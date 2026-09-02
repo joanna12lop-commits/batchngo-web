@@ -7,6 +7,13 @@ import { allManufacturers, getNavigationHref, manufacturerMatchesCategorySlug, m
 import { MARKETPLACE_CATEGORIES, resolveMarketplaceCategorySlug, SUPPLIER_TYPES } from "../lib/us-marketplace-taxonomy.ts";
 import { PROJECT_SPECIFICATIONS, getTechnicalReviewItems, isMakerGuidance, validateProjectSpecifications } from "../lib/project-specifications.ts";
 import { PROJECT_DRAFT_STORAGE_KEY, changeProjectDraftCategory, createEmptyProjectDraft, readProjectDraft } from "../lib/project-draft.ts";
+import {
+  MANUFACTURER_APPLICATION_DRAFT_STORAGE_KEY,
+  clearManufacturerApplicationDraft,
+  createEmptyManufacturerApplicationDraft,
+  readManufacturerApplicationDraft,
+  writeManufacturerApplicationDraft,
+} from "../lib/manufacturer-application-draft.ts";
 
 test("the launch taxonomy contains exactly four canonical categories", () => {
   assert.deepEqual(MARKETPLACE_CATEGORIES.map(({ name, slug }) => ({ name, slug })), [
@@ -136,4 +143,62 @@ test("user-facing source text does not contain common encoding artifacts", () =>
     }
   };
   for (const directory of ["app", "components", "lib"]) scan(join(projectRoot, directory));
+});
+
+test("manufacturer draft preserves completed steps and clears only on confirmation action", () => {
+  const values=new Map<string,string>();
+  const storage={getItem:(key:string)=>values.get(key)??null,setItem:(key:string,value:string)=>values.set(key,value),removeItem:(key:string)=>values.delete(key)};
+  const previous=Object.getOwnPropertyDescriptor(globalThis,"window");
+  Object.defineProperty(globalThis,"window",{configurable:true,value:{localStorage:storage,sessionStorage:storage,dispatchEvent:()=>true}});
+  try {
+    const first=createEmptyManufacturerApplicationDraft().step1;
+    first.businessName="Small Batch Studio";
+    first.businessEmail="hello@example.com";
+    first.selectedCategories=["Beauty & Personal Care"];
+    first.supplierTypes=["Product Manufacturer"];
+    writeManufacturerApplicationDraft({step1:first});
+    const second=createEmptyManufacturerApplicationDraft().step2;
+    second.supportedCategories=["Beauty & Personal Care"];
+    second.materials=["Glass"];
+    writeManufacturerApplicationDraft({step2:second});
+    assert.equal(readManufacturerApplicationDraft()?.step1.businessName,"Small Batch Studio");
+    assert.deepEqual(readManufacturerApplicationDraft()?.step2.materials,["Glass"]);
+    clearManufacturerApplicationDraft();
+    assert.equal(values.has(MANUFACTURER_APPLICATION_DRAFT_STORAGE_KEY),false);
+  } finally {
+    if(previous)Object.defineProperty(globalThis,"window",previous); else Reflect.deleteProperty(globalThis,"window");
+  }
+});
+
+test("legacy manufacturer drafts retain only the four canonical categories", () => {
+  const values=new Map<string,string>();
+  const storage={getItem:(key:string)=>values.get(key)??null,setItem:(key:string,value:string)=>values.set(key,value),removeItem:(key:string)=>values.delete(key)};
+  const previous=Object.getOwnPropertyDescriptor(globalThis,"window");
+  Object.defineProperty(globalThis,"window",{configurable:true,value:{localStorage:storage,sessionStorage:storage,dispatchEvent:()=>true}});
+  try {
+    const legacy=createEmptyManufacturerApplicationDraft();
+    legacy.schemaVersion=3;
+    legacy.step1.selectedCategories=["Beauty & Skincare","Unsupported category"];
+    storage.setItem(MANUFACTURER_APPLICATION_DRAFT_STORAGE_KEY,JSON.stringify(legacy));
+    assert.deepEqual(readManufacturerApplicationDraft()?.step1.selectedCategories,["Beauty & Personal Care"]);
+  } finally {
+    if(previous)Object.defineProperty(globalThis,"window",previous); else Reflect.deleteProperty(globalThis,"window");
+  }
+});
+
+test("manufacturer flow exposes accessible validation, local-only review, and contained progress", () => {
+  const entry=readFileSync(new URL("../app/for-manufacturers/apply/page.tsx",import.meta.url),"utf8");
+  const operations=readFileSync(new URL("../app/for-manufacturers/apply/operations/page.tsx",import.meta.url),"utf8");
+  const verification=readFileSync(new URL("../app/for-manufacturers/apply/verification/page.tsx",import.meta.url),"utf8");
+  const review=readFileSync(new URL("../app/for-manufacturers/apply/review/page.tsx",import.meta.url),"utf8");
+  const progress=readFileSync(new URL("../components/ManufacturerApplicationProgress.tsx",import.meta.url),"utf8");
+  assert.match(entry,/Enter a valid business email address/);
+  assert.match(entry,/aria-describedby/);
+  assert.match(operations,/MOQ is the smallest order/);
+  assert.match(operations,/Typical MOQ cannot exceed maximum order capacity/);
+  assert.match(verification,/Documents are not required in this demo/);
+  assert.match(review,/Save application draft/);
+  assert.match(review,/Your application draft has been saved in this browser\. It has not been submitted to BatchNGo\./);
+  assert.doesNotMatch(review,/fetch\(/);
+  assert.match(progress,/max-w-full overflow-x-auto/);
 });

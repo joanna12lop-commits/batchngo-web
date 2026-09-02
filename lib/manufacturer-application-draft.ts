@@ -1,6 +1,6 @@
 export const MANUFACTURER_APPLICATION_DRAFT_STORAGE_KEY =
   "batchngo-manufacturer-application-draft";
-import { getMarketplaceCategoryBySlug, resolveMarketplaceCategorySlug, resolveSupplierType } from "./us-marketplace-taxonomy";
+import { getMarketplaceCategoryBySlug, resolveMarketplaceCategorySlug, resolveSupplierType } from "./us-marketplace-taxonomy.ts";
 export const MANUFACTURER_APPLICATION_DRAFT_SESSION_KEY = "batchngo-manufacturer-application-draft-session";
 export const MANUFACTURER_DRAFT_SCHEMA_VERSION = 4;
 
@@ -107,4 +107,11 @@ export function writeManufacturerApplicationDraft(update: Partial<ManufacturerAp
   window.localStorage.setItem(MANUFACTURER_APPLICATION_DRAFT_STORAGE_KEY, JSON.stringify(next));
   window.dispatchEvent(new CustomEvent("batchngo:draft-changed", { detail: { kind: "manufacturer" } }));
   return next;
+}
+
+export function clearManufacturerApplicationDraft(): ManufacturerApplicationDraft {
+  window.localStorage.removeItem(MANUFACTURER_APPLICATION_DRAFT_STORAGE_KEY);
+  window.sessionStorage.removeItem(MANUFACTURER_APPLICATION_DRAFT_SESSION_KEY);
+  window.dispatchEvent(new CustomEvent("batchngo:draft-changed", { detail: { kind: "manufacturer" } }));
+  return createEmptyManufacturerApplicationDraft();
 }
