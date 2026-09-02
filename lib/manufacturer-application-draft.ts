@@ -1,7 +1,8 @@
 export const MANUFACTURER_APPLICATION_DRAFT_STORAGE_KEY =
   "batchngo-manufacturer-application-draft";
+import { getMarketplaceCategoryBySlug, resolveMarketplaceCategorySlug, resolveSupplierType } from "./us-marketplace-taxonomy";
 export const MANUFACTURER_APPLICATION_DRAFT_SESSION_KEY = "batchngo-manufacturer-application-draft-session";
-export const MANUFACTURER_DRAFT_SCHEMA_VERSION = 3;
+export const MANUFACTURER_DRAFT_SCHEMA_VERSION = 4;
 
 export type ManufacturerApplicationStep1 = {
   businessName: string; contactPerson: string; businessEmail: string;
@@ -68,7 +69,7 @@ export function readManufacturerApplicationDraft(): ManufacturerApplicationDraft
   try {
     const parsed: unknown = JSON.parse(raw);
     if (!isRecord(parsed)) throw new Error("Invalid manufacturer draft");
-    if (parsed.schemaVersion !== 2 && parsed.schemaVersion !== MANUFACTURER_DRAFT_SCHEMA_VERSION) throw new Error("Unsupported manufacturer draft version");
+    if (![2, 3, MANUFACTURER_DRAFT_SCHEMA_VERSION].includes(parsed.schemaVersion as number)) throw new Error("Unsupported manufacturer draft version");
     const empty = createEmptyManufacturerApplicationDraft();
     return {
       schemaVersion: MANUFACTURER_DRAFT_SCHEMA_VERSION,
@@ -85,11 +86,19 @@ function createDraftId() { return globalThis.crypto?.randomUUID?.() ?? `manufact
 function isRecord(value: unknown): value is Record<string, unknown> { return typeof value === "object" && value !== null && !Array.isArray(value); }
 const text = (value: unknown) => typeof value === "string" ? value : "";
 const texts = (value: unknown) => Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
+const categories = (value: unknown) => texts(value).flatMap((item) => {
+  const category = getMarketplaceCategoryBySlug(resolveMarketplaceCategorySlug(item));
+  return category ? [category.name] : [];
+});
+const supplierTypes = (value: unknown) => texts(value).flatMap((item) => {
+  const supplierType = resolveSupplierType(item);
+  return supplierType ? [supplierType] : [];
+});
 const bool = (value: unknown) => value === true;
 const files = (value: unknown) => Array.isArray(value) ? value.flatMap((item) => isRecord(item) && typeof item.name === "string" ? [{ name: item.name, isPdf: item.isPdf === true }] : []) : [];
 
-function normalizeStep1(value: unknown, empty: ManufacturerApplicationStep1): ManufacturerApplicationStep1 { if (!isRecord(value)) return empty; return { ...empty, businessName:text(value.businessName), contactPerson:text(value.contactPerson), businessEmail:text(value.businessEmail), businessCity:text(value.businessCity), businessState:text(value.businessState), businessZipCode:text(value.businessZipCode), businessCountry:"United States", website:text(value.website), supplierTypes:texts(value.supplierTypes), selectedCategories:texts(value.selectedCategories), usBasedCompany:bool(value.usBasedCompany), usManufacturing:bool(value.usManufacturing), originClaim:text(value.originClaim), minimumOrderQuantity:text(value.minimumOrderQuantity), typicalLeadTime:text(value.typicalLeadTime), capabilitiesDescription:text(value.capabilitiesDescription), portfolioImages:files(value.portfolioImages) }; }
-function normalizeStep2(value: unknown, empty: ManufacturerApplicationStep2): ManufacturerApplicationStep2 { if (!isRecord(value)) return empty; return { ...empty, supportedCategories:texts(value.supportedCategories), packagingTypes:texts(value.packagingTypes), productTypes:text(value.productTypes), materials:texts(value.materials), printingMethods:texts(value.printingMethods), finishingCapabilities:texts(value.finishingCapabilities), fillingCapabilities:texts(value.fillingCapabilities), manufacturingProcesses:texts(value.manufacturingProcesses), customizationOptions:texts(value.customizationOptions), industriesServed:texts(value.industriesServed), assemblyAndKitting:bool(value.assemblyAndKitting), prototypeAvailable:bool(value.prototypeAvailable), privateLabelSupport:bool(value.privateLabelSupport), packagingSupport:bool(value.packagingSupport), designSupport:bool(value.designSupport), certifications:texts(value.certifications), additionalCapabilityNotes:text(value.additionalCapabilityNotes) }; }
+function normalizeStep1(value: unknown, empty: ManufacturerApplicationStep1): ManufacturerApplicationStep1 { if (!isRecord(value)) return empty; return { ...empty, businessName:text(value.businessName), contactPerson:text(value.contactPerson), businessEmail:text(value.businessEmail), businessCity:text(value.businessCity), businessState:text(value.businessState), businessZipCode:text(value.businessZipCode), businessCountry:"United States", website:text(value.website), supplierTypes:supplierTypes(value.supplierTypes), selectedCategories:categories(value.selectedCategories), usBasedCompany:bool(value.usBasedCompany), usManufacturing:bool(value.usManufacturing), originClaim:text(value.originClaim), minimumOrderQuantity:text(value.minimumOrderQuantity), typicalLeadTime:text(value.typicalLeadTime), capabilitiesDescription:text(value.capabilitiesDescription), portfolioImages:files(value.portfolioImages) }; }
+function normalizeStep2(value: unknown, empty: ManufacturerApplicationStep2): ManufacturerApplicationStep2 { if (!isRecord(value)) return empty; return { ...empty, supportedCategories:categories(value.supportedCategories), packagingTypes:texts(value.packagingTypes), productTypes:text(value.productTypes), materials:texts(value.materials), printingMethods:texts(value.printingMethods), finishingCapabilities:texts(value.finishingCapabilities), fillingCapabilities:texts(value.fillingCapabilities), manufacturingProcesses:texts(value.manufacturingProcesses), customizationOptions:texts(value.customizationOptions), industriesServed:texts(value.industriesServed), assemblyAndKitting:bool(value.assemblyAndKitting), prototypeAvailable:bool(value.prototypeAvailable), privateLabelSupport:bool(value.privateLabelSupport), packagingSupport:bool(value.packagingSupport), designSupport:bool(value.designSupport), certifications:texts(value.certifications), additionalCapabilityNotes:text(value.additionalCapabilityNotes) }; }
 function normalizeStep3(value: unknown, empty: ManufacturerApplicationStep3): ManufacturerApplicationStep3 { if (!isRecord(value)) return empty; return { ...empty, minimumOrderQuantity:text(value.minimumOrderQuantity), maximumOrderCapacity:text(value.maximumOrderCapacity), monthlyCapacity:text(value.monthlyCapacity), typicalLeadTime:text(value.typicalLeadTime), sampleLeadTime:text(value.sampleLeadTime), sampleAvailable:text(value.sampleAvailable), shippingRegions:texts(value.shippingRegions), shippingStates:texts(value.shippingStates), countriesServed:"United States", facilityCity:text(value.facilityCity), facilityState:text(value.facilityState), facilityZipCode:text(value.facilityZipCode), facilityCountry:"United States", teamSize:text(value.teamSize), yearsInBusiness:text(value.yearsInBusiness), preferredProjectSizes:texts(value.preferredProjectSizes), operationalNotes:text(value.operationalNotes) }; }
 function normalizeStep4(value: unknown, empty: ManufacturerApplicationStep4): ManufacturerApplicationStep4 { if (!isRecord(value)) return empty; return { legalBusinessName:text(value.legalBusinessName), registrationNumber:text(value.registrationNumber), taxNumber:text(value.taxNumber), businessAddress:text(value.businessAddress), contactPhone:text(value.contactPhone), certifications:texts(value.certifications), insuranceConfirmed:bool(value.insuranceConfirmed), termsConfirmed:bool(value.termsConfirmed), documents:files(value.documents) }; }
 

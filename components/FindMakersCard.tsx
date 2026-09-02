@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Star } from "lucide-react";
 import type { Manufacturer } from "../lib/marketplace-data";
 
 export default function FindMakersCard({ maker }: { maker: Manufacturer }) {
@@ -24,15 +23,9 @@ export default function FindMakersCard({ maker }: { maker: Manufacturer }) {
             <p className="text-lg font-semibold text-[#111111]">{maker.businessName}</p>
             <p className="mt-1 text-sm text-[#7C7A74]">{maker.supplierType}</p>
           </div>
-          {maker.verified ? (
-            <span className="rounded-full bg-[#EAF2EC] px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-[#3F684F]">
-              CURATED PROFILE
-            </span>
-          ) : (
-            <span className="rounded-full bg-[#F1EEE8] px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-[#7C7A74]">
-              EXAMPLE PROFILE
-            </span>
-          )}
+          <span className="rounded-full bg-[#F1EEE8] px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-[#7C7A74]">
+            SAMPLE PROFILE
+          </span>
         </div>
 
         <div className="flex flex-wrap gap-2">
@@ -49,17 +42,10 @@ export default function FindMakersCard({ maker }: { maker: Manufacturer }) {
           ))}
         </div>
 
-        <div className="grid gap-3 text-sm text-[#7C7A74] sm:grid-cols-2">
+        <div className="text-sm text-[#7C7A74]">
           <div>
             <p className="font-medium text-[#111111]">Location</p>
             <p className="mt-1">{maker.location}</p>
-          </div>
-          <div>
-            <p className="font-medium text-[#111111]">Rating</p>
-            <div className="mt-1 flex items-center gap-2 text-[#111111]">
-              <Star className="text-[#B08B57]" size={16} />
-              <span>{maker.rating.toFixed(1)}</span>
-            </div>
           </div>
         </div>
 

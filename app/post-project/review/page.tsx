@@ -38,7 +38,7 @@ export default function ReviewPage() {
   };
 
   return <div className="min-h-screen bg-[#F6F3EE] text-[#1F2937]">
-    <Header compact />
+    <Header />
     <main className="mx-auto max-w-7xl px-4 pb-24 pt-32 sm:px-8">
       <ProgressBar />
       <header className="mb-10"><h1 className="text-4xl font-bold tracking-tight text-[#111111]">Review your project</h1><p className="mt-4 max-w-2xl text-lg leading-relaxed text-[#7C7A74]">Check the full production brief before completing this frontend submission flow.</p></header>

@@ -5,7 +5,7 @@ import Header from "../../../components/Header";
 export default function ProjectSuccessPage() {
   return (
     <div className="min-h-screen bg-[#F6F3EE] text-[#1F2937]">
-      <Header compact />
+      <Header />
       <main className="mx-auto flex min-h-[calc(100vh-73px)] max-w-4xl items-center px-4 py-20 sm:px-8">
         <section className="w-full rounded-[32px] border border-[#E5E0D8] bg-white p-8 text-center shadow-sm sm:p-12">
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#EAF2EC] text-[#3F684F]"><Check size={26} /></div>

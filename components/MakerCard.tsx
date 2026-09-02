@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Star } from "lucide-react";
 import type { MakerCardItem } from "../lib/marketplace-data";
 
 export default function MakerCard({ maker }: { maker: MakerCardItem }) {
@@ -22,7 +21,7 @@ export default function MakerCard({ maker }: { maker: MakerCardItem }) {
             <p className="mt-1 text-sm text-[#7C7A74]">{maker.specialty}</p>
           </div>
           <span className="rounded-full bg-[#EAF2EC] px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-[#3F684F]">
-            Curated profile
+            Sample profile
           </span>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -35,17 +34,10 @@ export default function MakerCard({ maker }: { maker: MakerCardItem }) {
             </span>
           ))}
         </div>
-        <div className="grid gap-3 text-sm text-[#7C7A74] sm:grid-cols-2">
+        <div className="text-sm text-[#7C7A74]">
           <div>
             <p className="font-medium text-[#111111]">Location</p>
             <p className="mt-1">{maker.location}</p>
-          </div>
-          <div>
-            <p className="font-medium text-[#111111]">Rating</p>
-            <div className="mt-1 flex items-center gap-2">
-              <Star className="text-[#B08B57]" size={16} />
-              <span>{maker.rating}</span>
-            </div>
           </div>
         </div>
         <div className="grid gap-3 rounded-3xl bg-[#EEF1E8] p-4 text-sm text-[#1F2937] sm:grid-cols-2">

@@ -1,6 +1,8 @@
 export const PROJECT_DRAFT_STORAGE_KEY = "batchngo-project-draft";
 export const PROJECT_DRAFT_SESSION_KEY = "batchngo-project-draft-session";
-export const PROJECT_DRAFT_SCHEMA_VERSION = 3;
+import { resolveMarketplaceCategorySlug } from "./us-marketplace-taxonomy";
+
+export const PROJECT_DRAFT_SCHEMA_VERSION = 4;
 
 export type ProjectStep1 = {
   selectedCategory: string;
@@ -47,6 +49,7 @@ export type ProjectStep4 = {
 export type ProjectDraft = {
   schemaVersion: number;
   draftId: string;
+  categoryMigrationRequired: boolean;
   step1: ProjectStep1;
   step2: ProjectStep2;
   step3: ProjectStep3;
@@ -58,6 +61,7 @@ export function createEmptyProjectDraft(): ProjectDraft {
   const emptyDraft: ProjectDraft = {
     schemaVersion: PROJECT_DRAFT_SCHEMA_VERSION,
     draftId: createDraftId(),
+    categoryMigrationRequired: false,
     step1: {
       selectedCategory: "",
       projectTitle: "",
@@ -144,13 +148,16 @@ export function readProjectDraft(): ProjectDraft | null {
     try {
       const parsed: unknown = JSON.parse(raw);
       if (!isRecord(parsed)) throw new Error("Invalid project draft");
-      if (parsed.schemaVersion !== 2 && parsed.schemaVersion !== PROJECT_DRAFT_SCHEMA_VERSION) {
+      if (![2, 3, PROJECT_DRAFT_SCHEMA_VERSION].includes(parsed.schemaVersion as number)) {
         throw new Error("Unsupported project draft version");
       }
       const empty = createEmptyProjectDraft();
+      const originalStep1 = isRecord(parsed.step1) ? parsed.step1 : {};
+      const originalCategory = stringValue(originalStep1.selectedCategory);
       return {
         schemaVersion: PROJECT_DRAFT_SCHEMA_VERSION,
         draftId: typeof parsed.draftId === "string" && parsed.draftId ? parsed.draftId : createDraftId(),
+        categoryMigrationRequired: Boolean(originalCategory && !resolveMarketplaceCategorySlug(originalCategory)),
         step1: normalizeStep1(parsed.step1, empty.step1),
         step2: {
           ...normalizeStep2(parsed.step2, empty.step2),
@@ -188,7 +195,7 @@ function fileMetadata(value: unknown): Array<{ name: string; isPdf: boolean }> {
 
 function normalizeStep1(value: unknown, empty: ProjectStep1): ProjectStep1 {
   if (!isRecord(value)) return empty;
-  return { selectedCategory: stringValue(value.selectedCategory), projectTitle: stringValue(value.projectTitle), description: stringValue(value.description), referenceImages: fileMetadata(value.referenceImages) };
+  return { selectedCategory: resolveMarketplaceCategorySlug(stringValue(value.selectedCategory)) ?? "", projectTitle: stringValue(value.projectTitle), description: stringValue(value.description), referenceImages: fileMetadata(value.referenceImages) };
 }
 
 function normalizeStep2(value: unknown, empty: ProjectStep2): ProjectStep2 {

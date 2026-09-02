@@ -36,12 +36,12 @@ export default function Hero() {
             >
               Post a Project
             </Link>
-            <a
-              href="#featured-makers"
+            <Link
+              href="/for-manufacturers/apply"
               className="inline-flex min-w-[170px] items-center justify-center rounded-full border border-[#E5E0D8] bg-white px-8 py-4 text-base font-semibold text-[#1F2937] transition hover:bg-[#EEF1E8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7C8A6A]"
             >
-              Browse Makers
-            </a>
+              Join as a Manufacturer
+            </Link>
           </div>
 
           <div className="mt-10 flex flex-wrap gap-4 text-xs font-semibold uppercase tracking-[0.24em] text-[#7C7A74]">

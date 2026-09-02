@@ -1,29 +1,14 @@
 import type { LucideIcon } from "lucide-react";
 import {
-  BookOpen,
-  Box,
   CheckCircle2,
-  Droplet,
-  Flame,
-  Gift,
-  Home,
   Lock,
   Package,
-  Scissors,
   ShieldCheck,
-  ShoppingBag,
   Sparkles,
   Truck,
   FileText,
 } from "lucide-react";
-
-export type CategoryItem = {
-  title: string;
-  description: string;
-  moq: string;
-  icon: LucideIcon;
-  image: string;
-};
+import { getMarketplaceCategoryBySlug, type SupplierType } from "./us-marketplace-taxonomy.ts";
 
 export type MakerCardItem = {
   slug: string;
@@ -54,7 +39,8 @@ export type Manufacturer = {
   category: string;
   location: string;
   country: string;
-  supplierType: "Packaging Manufacturer" | "Packaging Supplier" | "Contract Packager / Co-packer";
+  supplierType: SupplierType;
+  isPublished: boolean;
   businessLocation: { city: string; state: string; zipCode: string; country: "United States" };
   facilityLocation: { city: string; state: string; zipCode: string; country: "United States" };
   shippingStates: string[];
@@ -118,6 +104,16 @@ export const navLinks = [
   "For Manufacturers",
 ];
 
+export function getNavigationHref(link: string) {
+  switch (link) {
+    case "Find Makers": return "/find-makers";
+    case "How It Works": return "/#how-it-works";
+    case "Categories": return "/#categories";
+    case "For Manufacturers": return "/for-manufacturers/apply";
+    default: return `#${link.toLowerCase().replace(/\s+/g, "-")}`;
+  }
+}
+
 export const trustItems: Array<{
   title: string;
   description: string;
@@ -142,65 +138,6 @@ export const trustItems: Array<{
     title: "Transparent project workflow",
     description: "Keep requirements, timing, and custom specifications clear.",
     icon: Package,
-  },
-];
-
-export const categories: CategoryItem[] = [
-  {
-    title: "Candles",
-    description: "Warm scents, custom labels and flexible production runs.",
-    moq: "MOQ 100 pcs",
-    icon: Flame,
-    image: "/images/candles.png",
-  },
-  {
-    title: "Beauty & Skincare",
-    description: "Serums, balms and private label beauty runs.",
-    moq: "MOQ 120 pcs",
-    icon: Droplet,
-    image: "/images/beauty-skincare.png",
-  },
-  {
-    title: "Textile Accessories",
-    description: "Scrunchies, scarves and small-run textile goods.",
-    moq: "MOQ 150 pcs",
-    icon: Scissors,
-    image: "/images/textile-accessories.png",
-  },
-  {
-    title: "Bags & Pouches",
-    description: "Cosmetic bags, pouches and private label totes.",
-    moq: "MOQ 130 pcs",
-    icon: ShoppingBag,
-    image: "/images/bags-pouches.png",
-  },
-  {
-    title: "Notebooks & Print",
-    description: "Journals, notebooks and branded stationery.",
-    moq: "MOQ 200 pcs",
-    icon: BookOpen,
-    image: "/images/notebooks-print.png",
-  },
-  {
-    title: "Packaging",
-    description: "Retail-ready boxes, sleeves and gift packaging.",
-    moq: "MOQ 250 pcs",
-    icon: Box,
-    image: "/images/packaging.png",
-  },
-  {
-    title: "Home & Lifestyle",
-    description: "Decor, kitchenware and boutique lifestyle goods.",
-    moq: "MOQ 180 pcs",
-    icon: Home,
-    image: "/images/home-lifestyle.png",
-  },
-  {
-    title: "Gifts",
-    description: "Curated gift sets, bundles and retail-ready offers.",
-    moq: "MOQ 100 pcs",
-    icon: Gift,
-    image: "/images/gifts.png",
   },
 ];
 
@@ -233,7 +170,7 @@ const legacyManufacturers = [
     slug: "atelier-lumen",
     businessName: "Atelier Lumen",
     specialty: "Candle Studio",
-    category: "Candles",
+    category: "Candles & Home Fragrance",
     location: "Grasse, France",
     country: "France",
     verified: true,
@@ -393,17 +330,47 @@ const legacyManufacturers = [
 ];
 
 const usProfiles: Array<Pick<Manufacturer,"supplierType"|"businessLocation"|"facilityLocation"|"shippingRegions"|"shippingStates"|"packagingTypes"|"printingMethods"|"finishingCapabilities"|"fillingCapabilities"|"assemblyAndKitting"|"prototypeAvailable"|"industriesServed"|"usBasedCompany"|"usManufacturing"|"originClaim"> & Partial<Pick<Manufacturer,"specialty"|"category">>> = [
-  {supplierType:"Contract Packager / Co-packer",specialty:"Beauty & Personal Care Co-packer",category:"Beauty & Personal Care",businessLocation:{city:"Austin",state:"TX",zipCode:"78744",country:"United States"},facilityLocation:{city:"Austin",state:"TX",zipCode:"78744",country:"United States"},shippingRegions:["South","Nationwide"],shippingStates:["TX","OK","LA","AR","NM"],packagingTypes:["Bottles & jars","Tubes","Labels","Folding cartons"],printingMethods:["Digital printing","Label printing"],finishingCapabilities:["Matte coating","Foil stamping"],fillingCapabilities:["Liquids","Oils","Creams & lotions","Gels"],assemblyAndKitting:true,prototypeAvailable:true,industriesServed:["Beauty & Personal Care","Health & Wellness"],usBasedCompany:true,usManufacturing:true,originClaim:"Filled and packed in Texas using domestic and imported components."},
-  {supplierType:"Packaging Manufacturer",specialty:"Flexible Packaging Manufacturer",category:"Food & Beverage",businessLocation:{city:"Chicago",state:"IL",zipCode:"60632",country:"United States"},facilityLocation:{city:"Joliet",state:"IL",zipCode:"60431",country:"United States"},shippingRegions:["Midwest","Nationwide"],shippingStates:["IL","IN","WI","MI","OH","IA"],packagingTypes:["Flexible pouches","Labels","Mailers"],printingMethods:["Flexographic printing","Digital printing"],finishingCapabilities:["Matte coating","Gloss coating","Die cutting"],fillingCapabilities:[],assemblyAndKitting:false,prototypeAvailable:true,industriesServed:["Food & Beverage","Pet Care","Retail"],usBasedCompany:true,usManufacturing:true,originClaim:"Packaging converted and printed at the Illinois facility; film origin varies by specification."},
-  {supplierType:"Packaging Manufacturer",specialty:"Paperboard & Corrugated Packaging",category:"Retail & E-commerce",businessLocation:{city:"Allentown",state:"PA",zipCode:"18109",country:"United States"},facilityLocation:{city:"Allentown",state:"PA",zipCode:"18109",country:"United States"},shippingRegions:["Northeast","Nationwide"],shippingStates:["PA","NY","NJ","DE","MD","MA"],packagingTypes:["Folding cartons","Corrugated boxes","Rigid boxes","Retail displays"],printingMethods:["Offset printing","Digital printing","Flexographic printing"],finishingCapabilities:["Foil stamping","Embossing","Spot UV","Die cutting"],fillingCapabilities:[],assemblyAndKitting:true,prototypeAvailable:true,industriesServed:["Retail","E-commerce","Beauty & Personal Care","Food & Beverage"],usBasedCompany:true,usManufacturing:true,originClaim:"Boxes are manufactured in Pennsylvania; paper content and component origin depend on the selected material."},
-  {supplierType:"Packaging Supplier",specialty:"Stock Containers & Closures",category:"Health & Wellness",businessLocation:{city:"Los Angeles",state:"CA",zipCode:"90021",country:"United States"},facilityLocation:{city:"Reno",state:"NV",zipCode:"89502",country:"United States"},shippingRegions:["West","Nationwide"],shippingStates:["CA","NV","OR","WA","AZ","UT"],packagingTypes:["Bottles & jars","Tubes","Cans & tins"],printingMethods:["Screen printing","Direct-to-container printing","Label printing"],finishingCapabilities:["Matte coating","Gloss coating"],fillingCapabilities:[],assemblyAndKitting:false,prototypeAvailable:false,industriesServed:["Beauty & Personal Care","Supplements","Household Products"],usBasedCompany:true,usManufacturing:false,originClaim:"U.S.-based supplier; container country of origin is provided per SKU."},
-  {supplierType:"Contract Packager / Co-packer",specialty:"Food & Beverage Co-packer",category:"Food & Beverage",businessLocation:{city:"Charlotte",state:"NC",zipCode:"28208",country:"United States"},facilityLocation:{city:"Gastonia",state:"NC",zipCode:"28054",country:"United States"},shippingRegions:["South","Northeast"],shippingStates:["NC","SC","GA","VA","TN","FL"],packagingTypes:["Flexible pouches","Bottles & jars","Folding cartons","Labels"],printingMethods:["Label printing"],finishingCapabilities:[],fillingCapabilities:["Dry goods","Powders","Liquids","Food products","Beverages"],assemblyAndKitting:true,prototypeAvailable:true,industriesServed:["Food & Beverage","Supplements","Pet Care"],usBasedCompany:true,usManufacturing:true,originClaim:"Products are packed in North Carolina; ingredient and packaging origin varies by project."},
+  {supplierType:"Private-label Manufacturer",specialty:"Candle & Home Fragrance Manufacturer",category:"Candles & Home Fragrance",businessLocation:{city:"Austin",state:"TX",zipCode:"78744",country:"United States"},facilityLocation:{city:"Austin",state:"TX",zipCode:"78744",country:"United States"},shippingRegions:["South","Nationwide"],shippingStates:["TX","OK","LA","AR","NM"],packagingTypes:["Bottles & jars","Labels","Folding cartons"],printingMethods:["Digital printing","Label printing"],finishingCapabilities:["Matte coating","Foil stamping"],fillingCapabilities:["Oils"],assemblyAndKitting:true,prototypeAvailable:true,industriesServed:["Candles & Home Fragrance"],usBasedCompany:true,usManufacturing:true,originClaim:"Candles are poured and packed in Texas using domestic and imported components."},
+  {supplierType:"Product Manufacturer",specialty:"Textile Accessories & Pouches",category:"Textile Accessories & Pouches",businessLocation:{city:"Chicago",state:"IL",zipCode:"60632",country:"United States"},facilityLocation:{city:"Joliet",state:"IL",zipCode:"60431",country:"United States"},shippingRegions:["Midwest","Nationwide"],shippingStates:["IL","IN","WI","MI","OH","IA"],packagingTypes:["Flexible pouches","Labels","Mailers"],printingMethods:["Screen printing"],finishingCapabilities:[],fillingCapabilities:[],assemblyAndKitting:true,prototypeAvailable:true,industriesServed:["Textile Accessories & Pouches"],usBasedCompany:true,usManufacturing:true,originClaim:"Textile accessories are cut and sewn at the Illinois facility; material origin varies by specification."},
+  {supplierType:"Packaging Manufacturer",specialty:"Custom Print & Packaging",category:"Custom Packaging",businessLocation:{city:"Allentown",state:"PA",zipCode:"18109",country:"United States"},facilityLocation:{city:"Allentown",state:"PA",zipCode:"18109",country:"United States"},shippingRegions:["Northeast","Nationwide"],shippingStates:["PA","NY","NJ","DE","MD","MA"],packagingTypes:["Folding cartons","Corrugated boxes","Rigid boxes","Retail displays"],printingMethods:["Offset printing","Digital printing","Flexographic printing"],finishingCapabilities:["Foil stamping","Embossing","Spot UV","Die cutting"],fillingCapabilities:[],assemblyAndKitting:true,prototypeAvailable:true,industriesServed:["Custom Packaging","Beauty & Personal Care"],usBasedCompany:true,usManufacturing:true,originClaim:"Boxes are manufactured in Pennsylvania; paper content and component origin depend on the selected material."},
+  {supplierType:"Private-label Manufacturer",specialty:"Beauty & Personal Care",category:"Beauty & Personal Care",businessLocation:{city:"Los Angeles",state:"CA",zipCode:"90021",country:"United States"},facilityLocation:{city:"Los Angeles",state:"CA",zipCode:"90021",country:"United States"},shippingRegions:["West","Nationwide"],shippingStates:["CA","NV","OR","WA","AZ","UT"],packagingTypes:["Bottles & jars","Tubes","Labels"],printingMethods:["Screen printing","Direct-to-container printing","Label printing"],finishingCapabilities:["Matte coating","Gloss coating"],fillingCapabilities:["Liquids","Oils","Creams & lotions","Gels"],assemblyAndKitting:true,prototypeAvailable:true,industriesServed:["Beauty & Personal Care"],usBasedCompany:true,usManufacturing:true,originClaim:"Beauty products are formulated and filled in Los Angeles; ingredient origin varies by formula."},
+  {supplierType:"Product Manufacturer",specialty:"Home & Lifestyle",category:"Home & Lifestyle",businessLocation:{city:"Charlotte",state:"NC",zipCode:"28208",country:"United States"},facilityLocation:{city:"Gastonia",state:"NC",zipCode:"28054",country:"United States"},shippingRegions:["South","Northeast"],shippingStates:["NC","SC","GA","VA","TN","FL"],packagingTypes:["Folding cartons","Labels"],printingMethods:["Label printing"],finishingCapabilities:[],fillingCapabilities:[],assemblyAndKitting:true,prototypeAvailable:true,industriesServed:["Home & Lifestyle"],usBasedCompany:true,usManufacturing:true,originClaim:"Products are made in North Carolina; material origin varies by project."},
 ];
 
-export const manufacturers: Manufacturer[] = legacyManufacturers.map((maker,index)=>{
+const profileCopy: Record<string, Pick<Manufacturer, "shortDescription" | "fullDescription">> = {
+  "atelier-lumen": {
+    shortDescription: "A small-batch candle and home fragrance manufacturer supporting custom scents, vessels, labels and private-label collections.",
+    fullDescription: "Atelier Lumen develops custom candles and home fragrance collections for emerging brands. Its team supports fragrance sampling, wax and wick selection, vessel sourcing, label application, kitting and flexible production runs.",
+  },
+  "stitch-and-stone": {
+    shortDescription: "A small-run sewing studio for textile accessories, cosmetic bags, pouches and branded soft goods.",
+    fullDescription: "Stitch & Stone produces sewn textile accessories for emerging brands, including scrunchies, cosmetic bags, drawstring pouches and other compact soft goods. The team supports pattern refinement, sampling, material sourcing and manageable production runs.",
+  },
+  "pressed-studio": {
+    shortDescription: "A custom packaging manufacturer producing boxes, printed materials, labels and retail-ready packaging.",
+    fullDescription: "Pressed Studio specializes in custom boxes, printed packaging components and retail-ready presentation. The team supports paper sourcing, structural prototypes, printing, premium finishes, inserts and packaging assembly.",
+  },
+  "luna-atelier": {
+    shortDescription: "A Los Angeles private-label manufacturer for skincare, body care and emerging beauty collections.",
+    fullDescription: "Luna Atelier develops and fills skincare and personal care products in Los Angeles. The team supports private-label formulas, ingredient guidance, product sampling, filling, labeling and coordinated beauty packaging.",
+  },
+  "harbor-works": {
+    shortDescription: "A craft-focused workshop producing small-run home and lifestyle goods.",
+    fullDescription: "Harbor Works supports home and hospitality projects with ceramic and mixed-material production in manageable runs.",
+  },
+};
+
+export const allManufacturers: Manufacturer[] = legacyManufacturers.map((maker,index)=>{
   const profile=usProfiles[index];
-  return {...maker,...profile,location:`${profile.businessLocation.city}, ${profile.businessLocation.state} ${profile.businessLocation.zipCode}, United States`,country:"United States",materials:maker.materials};
+  return {...maker,...profile,...profileCopy[maker.slug],isPublished:maker.slug!=="harbor-works",location:`${profile.businessLocation.city}, ${profile.businessLocation.state} ${profile.businessLocation.zipCode}, United States`,country:"United States",materials:maker.materials};
 });
+
+export const manufacturers = allManufacturers.filter((maker) => maker.isPublished);
+
+export function manufacturerMatchesCategorySlug(maker: Manufacturer, slug: string | null | undefined) {
+  const category = getMarketplaceCategoryBySlug(slug);
+  return !slug || !category || maker.category === category.name;
+}
 
 export const getManufacturerBySlug = (slug: string) =>
   manufacturers.find((maker) => maker.slug === slug);
@@ -433,28 +400,28 @@ export const exampleProjects: ProjectCardItem[] = [
     alt: "100 soy candles with custom labels",
   },
   {
-    title: "250 branded satin scrunchies",
-    category: "Textile Accessories",
-    quantity: "250 pcs",
+    title: "120 private-label body care sets",
+    category: "Beauty & Personal Care",
+    quantity: "120 pcs",
     budget: "$1,450",
     timeline: "12 days",
     delivery: "Los Angeles",
-    image: "/images/project-satin-scrunchies.png",
-    alt: "250 branded satin scrunchies",
+    image: "/images/beauty-skincare.png",
+    alt: "Private-label body care products in custom packaging",
   },
   {
-    title: "500 linen notebooks with foil stamp",
-    category: "Notebooks & Print",
+    title: "500 custom retail boxes with foil details",
+    category: "Custom Packaging",
     quantity: "500 pcs",
     budget: "$4,800",
     timeline: "18 days",
     delivery: "Toronto",
-    image: "/images/project-linen-notebooks.png",
-    alt: "500 linen notebooks with foil stamp",
+    image: "/images/packaging.png",
+    alt: "Custom printed retail boxes with foil details",
   },
   {
     title: "300 padded cosmetic pouches",
-    category: "Bags & Pouches",
+    category: "Textile Accessories & Pouches",
     quantity: "300 pcs",
     budget: "$2,600",
     timeline: "16 days",

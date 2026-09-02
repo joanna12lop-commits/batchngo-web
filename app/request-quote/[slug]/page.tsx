@@ -9,6 +9,8 @@ export function generateStaticParams() {
   return manufacturers.map(({ slug }) => ({ slug }));
 }
 
+export const dynamicParams = false;
+
 export default async function RequestQuotePage({ params }: PageProps<"/request-quote/[slug]">) {
   const { slug } = await params;
   const maker = getManufacturerBySlug(slug);

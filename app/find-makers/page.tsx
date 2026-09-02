@@ -1,34 +1,49 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import Header from "../../components/Header";
 import FindMakersCard from "../../components/FindMakersCard";
-import { manufacturers } from "../../lib/marketplace-data";
-import { PRODUCT_CATEGORIES, SUPPLIER_TYPES, US_REGIONS, US_STATES } from "../../lib/us-marketplace-taxonomy";
+import { manufacturerMatchesCategorySlug, manufacturers } from "../../lib/marketplace-data";
+import { MARKETPLACE_CATEGORIES, resolveMarketplaceCategorySlug, SUPPLIER_TYPES, US_REGIONS, US_STATES } from "../../lib/us-marketplace-taxonomy";
 import { ChevronDown, Search, SlidersHorizontal } from "lucide-react";
 
-const categories = [...PRODUCT_CATEGORIES];
 const MOQOptions = ["Any", "0-100", "101-150", "151+"];
 const leadTimeOptions = ["Any", "Up to 2 weeks", "3-4 weeks", "5+ weeks"];
 const sortOptions = [
   "Recommended",
-  "Rating",
   "Lowest MOQ",
   "Fastest lead time",
 ];
 
+const subscribeToLocation = (callback: () => void) => {
+  window.addEventListener("popstate", callback);
+  return () => window.removeEventListener("popstate", callback);
+};
+const getCategorySnapshot = () => resolveMarketplaceCategorySlug(new URLSearchParams(window.location.search).get("category")) ?? "Any";
+
 export default function FindMakersPage() {
   const [query, setQuery] = useState("");
   const [showFilters, setShowFilters] = useState(false);
-  const [category, setCategory] = useState("Any");
+  const category = useSyncExternalStore(subscribeToLocation, getCategorySnapshot, () => "Any");
   const [region, setRegion] = useState("Any");
   const [shippingState, setShippingState] = useState("Any");
   const [supplierType, setSupplierType] = useState("Any");
   const [moq, setMoq] = useState("Any");
   const [leadTime, setLeadTime] = useState("Any");
   const [sampleOnly, setSampleOnly] = useState(false);
-  const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [sortBy, setSortBy] = useState("Recommended");
+
+  const updateCategory = (value: string) => {
+    window.history.replaceState(null, "", value === "Any" ? "/find-makers" : `/find-makers?category=${value}`);
+    window.dispatchEvent(new PopStateEvent("popstate"));
+  };
+
+  const resetFilters = () => {
+    setRegion("Any"); setShippingState("Any"); setSupplierType("Any");
+    setMoq("Any"); setLeadTime("Any"); setSampleOnly(false); setQuery(""); setSortBy("Recommended");
+    window.history.replaceState(null, "", "/find-makers");
+    window.dispatchEvent(new PopStateEvent("popstate"));
+  };
 
   const filteredMakers = useMemo(() => {
     let result = manufacturers.filter((maker) => {
@@ -38,7 +53,7 @@ export default function FindMakersPage() {
         maker.category.toLowerCase().includes(query.toLowerCase()) ||
         maker.location.toLowerCase().includes(query.toLowerCase());
 
-      const matchesCategory = category === "Any" || maker.category === category;
+      const matchesCategory = category === "Any" || manufacturerMatchesCategorySlug(maker, category);
       const matchesRegion = region === "Any" || maker.shippingRegions.includes(region);
       const matchesState = shippingState === "Any" || maker.shippingStates.includes(shippingState);
       const matchesSupplierType = supplierType === "Any" || maker.supplierType === supplierType;
@@ -55,7 +70,6 @@ export default function FindMakersPage() {
           maker.leadTimeValue <= 28) ||
         (leadTime === "5+ weeks" && maker.leadTimeValue > 28);
       const matchesSample = !sampleOnly || maker.sampleAvailable;
-      const matchesVerified = !verifiedOnly || maker.verified;
 
       return (
         matchesQuery &&
@@ -63,14 +77,11 @@ export default function FindMakersPage() {
         matchesRegion && matchesState && matchesSupplierType &&
         matchesMoq &&
         matchesLeadTime &&
-        matchesSample &&
-        matchesVerified
+        matchesSample
       );
     });
 
-    if (sortBy === "Rating") {
-      result = [...result].sort((a, b) => b.rating - a.rating);
-    } else if (sortBy === "Lowest MOQ") {
+    if (sortBy === "Lowest MOQ") {
       result = [...result].sort((a, b) => a.moqValue - b.moqValue);
     } else if (sortBy === "Fastest lead time") {
       result = [...result].sort((a, b) => a.leadTimeValue - b.leadTimeValue);
@@ -84,7 +95,6 @@ export default function FindMakersPage() {
     moq,
     leadTime,
     sampleOnly,
-    verifiedOnly,
     sortBy,
   ]);
 
@@ -179,12 +189,13 @@ export default function FindMakersPage() {
                     </label>
                     <select
                       value={category}
-                      onChange={(event) => setCategory(event.target.value)}
+                      onChange={(event) => updateCategory(event.target.value)}
+                      aria-label="Filter makers by product category"
                       className="h-14 w-full rounded-2xl border border-[#E5E0D8] bg-[#F6F3EE]/60 px-4 text-sm text-[#111111] outline-none focus:border-[#7C8A6A] focus:ring-4 focus:ring-[#7C8A6A]/10"
                     >
-                      <option>Any</option>
-                      {categories.map((option) => (
-                        <option key={option}>{option}</option>
+                      <option value="Any">Any</option>
+                      {MARKETPLACE_CATEGORIES.map((option) => (
+                        <option key={option.slug} value={option.slug}>{option.name}</option>
                       ))}
                     </select>
                   </div>
@@ -254,17 +265,6 @@ export default function FindMakersPage() {
                         />
                         Sample available
                       </label>
-                      <label className="inline-flex items-center gap-3 rounded-2xl border border-[#E5E0D8] bg-[#F6F3EE]/60 px-4 py-3 text-sm text-[#1F2937]">
-                        <input
-                          type="checkbox"
-                          checked={verifiedOnly}
-                          onChange={(event) =>
-                            setVerifiedOnly(event.target.checked)
-                          }
-                          className="h-4 w-4 rounded border-[#E5E0D8] text-[#7C8A6A] focus:ring-[#7C8A6A]"
-                        />
-                        Curated profiles only
-                      </label>
                     </div>
                   </div>
                 </div>
@@ -301,16 +301,7 @@ export default function FindMakersPage() {
                   </p>
                   <button
                     type="button"
-                    onClick={() => {
-                      setCategory("Any");
-                      setRegion("Any"); setShippingState("Any"); setSupplierType("Any");
-                      setMoq("Any");
-                      setLeadTime("Any");
-                      setSampleOnly(false);
-                      setVerifiedOnly(false);
-                      setQuery("");
-                      setSortBy("Recommended");
-                    }}
+                    onClick={resetFilters}
                     className="mt-8 inline-flex rounded-full border border-[#E5E0D8] bg-white px-8 py-4 text-sm font-semibold text-[#1F2937] transition hover:bg-[#EEF1E8]"
                   >
                     Reset filters

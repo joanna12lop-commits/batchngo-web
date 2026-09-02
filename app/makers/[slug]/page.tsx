@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Check, Star } from "lucide-react";
+import { Check } from "lucide-react";
 import Footer from "../../../components/Footer";
 import Header from "../../../components/Header";
 import SaveMakerButton from "../../../components/SaveMakerButton";
@@ -15,16 +15,14 @@ export function generateStaticParams() {
   return manufacturers.map(({ slug }) => ({ slug }));
 }
 
-function ProfileBadge({ verified }: { verified: boolean }) {
+export const dynamicParams = false;
+
+function ProfileBadge() {
   return (
     <span
-      className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] ${
-        verified
-          ? "bg-[#EAF2EC] text-[#3F684F]"
-          : "bg-[#F1EEE8] text-[#7C7A74]"
-      }`}
+      className="rounded-full bg-[#F1EEE8] px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-[#7C7A74]"
     >
-      {verified ? "CURATED PROFILE" : "EXAMPLE PROFILE"}
+      SAMPLE PROFILE
     </span>
   );
 }
@@ -104,10 +102,9 @@ export default async function MakerProfilePage({ params }: PageProps<"/makers/[s
           </div>
 
           <div className="flex flex-col justify-center">
-            <div className="flex flex-wrap items-center gap-3"><ProfileBadge verified={maker.verified} /><span className="rounded-full bg-[#EEF1E8] px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-[#7C8A6A]">{maker.supplierType}</span></div>
+            <div className="flex flex-wrap items-center gap-3"><ProfileBadge /><span className="rounded-full bg-[#EEF1E8] px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-[#7C8A6A]">{maker.supplierType}</span></div>
             <h1 className="mt-5 text-4xl font-semibold tracking-tight text-[#111111] sm:text-5xl">{maker.businessName}</h1>
             <p className="mt-3 text-base text-[#7C7A74]">{maker.location}</p>
-            <div className="mt-4 flex items-center gap-2 text-sm"><Star size={18} className="text-[#B08B57]" /><strong>{maker.rating.toFixed(1)}</strong><span className="text-[#7C7A74]">({maker.reviewCount} reviews)</span></div>
             <p className="mt-6 max-w-xl text-base leading-8 text-[#7C7A74]">{maker.shortDescription}</p>
             <div className="mt-6 grid gap-3 sm:grid-cols-3"><Fact label="MOQ" value={maker.moq} /><Fact label="Lead time" value={maker.leadTime} /><Fact label="Samples" value={yesNo(maker.sampleAvailable)} /></div>
             <div className="mt-7 flex flex-col gap-3 sm:flex-row">
@@ -149,10 +146,6 @@ export default async function MakerProfilePage({ params }: PageProps<"/makers/[s
               <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">{maker.portfolioImages.map((image) => <div key={`portfolio-${image.src}`} className="relative aspect-[4/3] overflow-hidden rounded-[32px] border border-[#E5E0D8] bg-white shadow-sm"><Image src={image.src} alt={image.alt} fill sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 33vw" className="object-cover" /></div>)}</div>
             </section>
 
-            <section>
-              <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[#7C8A6A]">Client feedback</p><h2 className="mt-3 text-3xl font-semibold text-[#111111]">Reviews</h2>
-              <div className="mt-6 grid gap-6 md:grid-cols-3">{maker.reviews.map((review) => <article key={`${review.author}-${review.date}`} className="rounded-[32px] border border-[#E5E0D8] bg-white p-6 shadow-sm"><div className="flex items-center gap-2 text-sm"><Star size={16} className="text-[#B08B57]" /><strong>{review.rating.toFixed(1)}</strong></div><h3 className="mt-4 font-semibold text-[#111111]">{review.author}</h3><p className="mt-1 text-xs uppercase tracking-[0.16em] text-[#7C7A74]">{review.date}</p>{review.project ? <p className="mt-4 text-sm font-semibold text-[#7C8A6A]">{review.project}</p> : null}<p className="mt-3 text-sm leading-7 text-[#7C7A74]">{review.text}</p></article>)}</div>
-            </section>
           </div>
           <aside><QuotePanel maker={maker} /></aside>
         </div>

@@ -85,7 +85,7 @@ export default function ManufacturerReviewPage() {
   const ops = draft.step3;
   return (
     <div className="min-h-screen bg-[#F6F3EE]">
-      <Header compact />
+      <Header />
       <main className="mx-auto max-w-[1100px] px-4 pb-20 pt-20 sm:px-6">
         <ManufacturerApplicationProgress activeStep={5} />
         <h1 className="mb-3 text-4xl font-semibold">Review Application</h1>

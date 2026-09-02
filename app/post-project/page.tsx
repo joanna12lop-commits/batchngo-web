@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Header from "../../components/Header";
-import { PRODUCT_CATEGORIES } from "../../lib/us-marketplace-taxonomy";
+import { MARKETPLACE_CATEGORIES } from "../../lib/us-marketplace-taxonomy";
 import {
   PROJECT_DRAFT_STORAGE_KEY,
   createEmptyProjectDraft,
@@ -21,8 +21,7 @@ import {
   Save,
 } from "lucide-react";
 
-const categoryImages=["/images/packaging.png","/images/beauty-skincare.png","/images/candles.png","/images/home-lifestyle.png","/images/gifts.png","/images/textile-accessories.png","/images/bags-pouches.png","/images/notebooks-print.png"];
-const categories=PRODUCT_CATEGORIES.map((label,index)=>({id:label.toLowerCase().replaceAll(" & ","-").replaceAll(" ","-"),label,image:categoryImages[index],alt:`${label} production project`}));
+const categories = MARKETPLACE_CATEGORIES.map((category) => ({ ...category, label: category.name }));
 
 type FilePreview = {
   id: string;
@@ -94,6 +93,9 @@ export default function PostProjectPage() {
       setSelectedCategory(draft!.step1.selectedCategory);
       setProjectTitle(draft!.step1.projectTitle);
       setDescription(draft!.step1.description);
+      if (draft!.categoryMigrationRequired) {
+        setMessage("Your saved category is no longer available. Please choose one of the four current categories.");
+      }
     };
 
     loadDraft();
@@ -136,6 +138,7 @@ export default function PostProjectPage() {
     }
 
     writeProjectDraft({
+      categoryMigrationRequired: false,
       step1: {
         selectedCategory,
         projectTitle,
@@ -169,6 +172,7 @@ export default function PostProjectPage() {
     }
 
     writeProjectDraft({
+      categoryMigrationRequired: false,
       step1: {
         selectedCategory,
         projectTitle,
@@ -235,7 +239,7 @@ export default function PostProjectPage() {
 
   return (
     <div className="min-h-screen bg-[#F6F3EE] text-[#1F2937]">
-      <Header compact />
+      <Header />
       <main className="pt-32 pb-24 px-8 max-w-7xl mx-auto">
         <div className="mb-16 overflow-x-auto no-scrollbar">
           <div className="flex items-center justify-between min-w-[900px] py-4 bg-white rounded-2xl px-10 border border-[#E5E0D8] shadow-sm">

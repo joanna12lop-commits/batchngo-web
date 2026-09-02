@@ -18,7 +18,7 @@ export default function FeaturedMakers() {
           </h2>
           <p className="mt-4 text-base leading-8 text-[#7C7A74]">
             Explore a curated selection of example small-batch maker profiles
-            with packaging, wellness, print and textile expertise.
+            across candles, beauty, packaging and textile production.
           </p>
         </div>
         <div className="mt-10 grid gap-6 lg:grid-cols-3">

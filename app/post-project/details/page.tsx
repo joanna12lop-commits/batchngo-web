@@ -135,7 +135,7 @@ export default function TechnicalDetailsPage() {
 
   return (
     <div className="min-h-screen bg-[#F6F3EE] text-[#1F2937]">
-      <Header compact />
+      <Header />
       <main className="mx-auto max-w-7xl px-4 pb-24 pt-32 sm:px-8">
         <ProgressBar />
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-[1fr_360px]">
