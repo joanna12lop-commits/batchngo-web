@@ -1,0 +1,1 @@
+export default function Loading(){return <main className="flex min-h-[60vh] items-center justify-center bg-[#F6F3EE] px-6"><div role="status" className="rounded-[28px] border border-[#E5E0D8] bg-white px-8 py-6 text-sm font-semibold text-[#7C7A74] shadow-sm">Loading BatchNGo…</div></main>;}

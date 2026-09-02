@@ -1,0 +1,13 @@
+import Link from "next/link";
+import { getAdminContext } from "../../../lib/admin/server";
+import type { Json } from "../../../lib/supabase/database.types";
+
+const object=(input:Json):Record<string,Json|undefined>=>typeof input==="object"&&input!==null&&!Array.isArray(input)?input:{};
+const text=(input:Json|undefined)=>typeof input==="string"?input:"";
+export default async function AdminManufacturersPage({searchParams}:{searchParams:Promise<{status?:string}>}) {
+  const context=await getAdminContext();if(!context.ok)return null;const{status}=await searchParams;
+  let query=context.admin.from("manufacturer_applications").select("*").order("submitted_at",{ascending:false}).limit(250);
+  if(status)query=query.eq("status",status as "draft"|"submitted"|"under_review"|"approved"|"rejected");
+  const{data:result}=await query;const data=result??[];
+  return <main className="mx-auto max-w-[1500px] px-5 py-10 sm:px-8"><div className="flex flex-wrap justify-between gap-4"><div><p className="text-xs font-bold uppercase tracking-[0.2em] text-[#7C8A6A]">Verification queue</p><h1 className="mt-2 text-4xl font-semibold">Manufacturer applications</h1></div><form className="flex items-end gap-2"><label className="text-xs font-bold uppercase tracking-wider text-[#7C7A74]">Status<select name="status" defaultValue={status||""} className="mt-2 block h-11 rounded-xl border border-[#E5E0D8] bg-white px-3 text-sm normal-case"><option value="">All</option>{["submitted","under_review","approved","rejected","draft"].map((item)=><option key={item}>{item}</option>)}</select></label><button className="h-11 rounded-full bg-[#7C8A6A] px-5 text-sm font-bold text-white">Filter</button></form></div><div className="mt-8 grid gap-4">{data.map((application)=>{const draft=object(object(application.application_data).draft as Json),step1=object(draft.step1 as Json);return <Link key={application.id} href={`/admin/manufacturers/${application.id}`} className="grid gap-4 rounded-[24px] border border-[#E5E0D8] bg-white p-5 transition hover:border-[#7C8A6A] md:grid-cols-[1fr_1fr_180px_140px]"><div><strong>{text(step1.businessName)||"Unnamed business"}</strong><span className="mt-1 block text-xs text-[#7C7A74]">{text(step1.businessEmail)}</span></div><span className="text-sm">{Array.isArray(step1.supplierTypes)?step1.supplierTypes.join(", "):"—"}</span><span className="text-sm">{[text(step1.businessCity),text(step1.businessState)].filter(Boolean).join(", ")||"—"}</span><span className="text-xs font-bold uppercase text-[#667255]">{application.status.replaceAll("_"," ")}</span></Link>})}{!data.length?<p className="rounded-[24px] border border-dashed border-[#D3CDC2] p-10 text-center text-sm text-[#7C7A74]">No applications in this queue.</p>:null}</div></main>;
+}

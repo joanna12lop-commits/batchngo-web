@@ -1,0 +1,2 @@
+import "server-only";import{createClient}from"./server";import{createAdminClient}from"./admin";
+export async function requireAdmin(){const client=await createClient();const{data:{user}}=await client.auth.getUser();if(!user)throw new Error("Unauthorized");const{data:profile}=await client.from("profiles").select("role").eq("id",user.id).single();if(profile?.role!=="admin")throw new Error("Forbidden");return{user,admin:createAdminClient()};}
