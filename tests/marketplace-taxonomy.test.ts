@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { extname, join } from "node:path";
 import test from "node:test";
 import { allManufacturers, getNavigationHref, manufacturerMatchesCategorySlug, manufacturers } from "../lib/marketplace-data.ts";
 import { MARKETPLACE_CATEGORIES, resolveMarketplaceCategorySlug, SUPPLIER_TYPES } from "../lib/us-marketplace-taxonomy.ts";
@@ -62,7 +64,7 @@ test("each launch category has an isolated technical specification", () => {
 });
 
 test("maker guidance satisfies the required technical decisions", () => {
-  assert.equal(isMakerGuidance("Not sure â€” need maker guidance"), true);
+  assert.equal(isMakerGuidance("Not sure — need maker guidance"), true);
   assert.equal(isMakerGuidance("Maker recommendation"), true);
   assert.deepEqual(validateProjectSpecifications({...createEmptyProjectDraft().step2,productType:"Not sure — need maker guidance",primaryDecision:"Maker recommendation"}), { productType: "", primaryDecision: "" });
   assert.notEqual(validateProjectSpecifications(createEmptyProjectDraft().step2).productType, "");
@@ -118,4 +120,20 @@ test("post-project layouts constrain wide content to local responsive containers
   assert.match(timeline, /w-full min-w-0 max-w-5xl/);
   assert.match(timeline, /block w-full min-w-0 max-w-full/);
   assert.doesNotMatch(timeline, /overflow-x-hidden/);
+});
+
+test("user-facing source text does not contain common encoding artifacts", () => {
+  const projectRoot = fileURLToPath(new URL("..", import.meta.url));
+  const sourceExtensions = new Set([".ts", ".tsx", ".css", ".md"]);
+  const artifacts = /[ÂÃâ�]/u;
+  const scan = (directory: string): void => {
+    for (const entry of readdirSync(directory, { withFileTypes: true })) {
+      const path = join(directory, entry.name);
+      if (entry.isDirectory()) scan(path);
+      else if (sourceExtensions.has(extname(entry.name))) {
+        assert.doesNotMatch(readFileSync(path, "utf8"), artifacts, `Encoding artifact found in ${path}`);
+      }
+    }
+  };
+  for (const directory of ["app", "components", "lib"]) scan(join(projectRoot, directory));
 });

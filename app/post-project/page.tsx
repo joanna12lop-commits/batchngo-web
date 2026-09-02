@@ -253,7 +253,7 @@ export default function PostProjectPage() {
             </span>
             {isSelected ? (
               <div className="absolute top-3 right-3 w-6 h-6 bg-[#7C8A6A] rounded-full flex items-center justify-center text-white shadow-sm">
-                <span className="text-[10px]">âœ“</span>
+                <span className="text-[10px]">✓</span>
               </div>
             ) : null}
           </button>
@@ -347,7 +347,7 @@ export default function PostProjectPage() {
                   htmlFor="project-title"
                   className="block text-sm font-bold uppercase tracking-widest text-[#1F2937] mb-4"
                 >
-                  Project Title Â· Required
+                  Project Title · Required
                 </label>
                 <input
                   id="project-title"
@@ -376,7 +376,7 @@ export default function PostProjectPage() {
                   htmlFor="description"
                   className="block text-sm font-bold uppercase tracking-widest text-[#1F2937] mb-4"
                 >
-                  Product Description Â· Required
+                  Product Description · Required
                 </label>
                 <textarea
                   id="description"
@@ -609,7 +609,7 @@ export default function PostProjectPage() {
 
       <footer className="py-16 border-t border-[#E5E0D8] px-8 bg-white">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center text-[11px] uppercase tracking-[0.2em] font-bold text-[#7C7A74]/60 space-y-6 md:space-y-0">
-          <p>Â© {new Date().getFullYear()} BatchNGo Marketplace</p>
+          <p>© {new Date().getFullYear()} BatchNGo Marketplace</p>
           <div className="flex flex-wrap justify-center gap-6">
             <Link
               href="/support"
