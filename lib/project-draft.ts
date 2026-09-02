@@ -1,8 +1,8 @@
 export const PROJECT_DRAFT_STORAGE_KEY = "batchngo-project-draft";
 export const PROJECT_DRAFT_SESSION_KEY = "batchngo-project-draft-session";
-import { resolveMarketplaceCategorySlug } from "./us-marketplace-taxonomy";
+import { resolveMarketplaceCategorySlug } from "./us-marketplace-taxonomy.ts";
 
-export const PROJECT_DRAFT_SCHEMA_VERSION = 4;
+export const PROJECT_DRAFT_SCHEMA_VERSION = 5;
 
 export type ProjectStep1 = {
   selectedCategory: string;
@@ -12,9 +12,15 @@ export type ProjectStep1 = {
 };
 
 export type ProjectStep2 = {
+  categorySlug: string;
   productType: string;
+  primaryDecision: string;
+  secondaryDecision: string;
   materials: string[];
   dimensions: { length: string; width: string; height: string; unit: string };
+  size: { value: string; unit: string };
+  textDetail: string;
+  printingFinishing: string[];
   colorRequirements: string;
   customizationOptions: string[];
   packagingRequirements: string;
@@ -69,9 +75,15 @@ export function createEmptyProjectDraft(): ProjectDraft {
       referenceImages: [],
     },
     step2: {
+      categorySlug: "",
       productType: "",
+      primaryDecision: "",
+      secondaryDecision: "",
       materials: [],
       dimensions: { length: "", width: "", height: "", unit: "cm" },
+      size: { value: "", unit: "" },
+      textDetail: "",
+      printingFinishing: [],
       colorRequirements: "",
       customizationOptions: [],
       packagingRequirements: "",
@@ -115,7 +127,12 @@ export function hasMeaningfulProjectDraft(draft: ProjectDraft | null): boolean {
       step1.description.trim() ||
       step1.referenceImages.length ||
       step2.productType.trim() ||
+      step2.primaryDecision.trim() ||
+      step2.secondaryDecision.trim() ||
       step2.materials.length ||
+      step2.size.value ||
+      step2.textDetail.trim() ||
+      step2.printingFinishing.length ||
       step2.dimensions.length ||
       step2.dimensions.width ||
       step2.dimensions.height ||
@@ -148,7 +165,7 @@ export function readProjectDraft(): ProjectDraft | null {
     try {
       const parsed: unknown = JSON.parse(raw);
       if (!isRecord(parsed)) throw new Error("Invalid project draft");
-      if (![2, 3, PROJECT_DRAFT_SCHEMA_VERSION].includes(parsed.schemaVersion as number)) {
+      if (![2, 3, 4, PROJECT_DRAFT_SCHEMA_VERSION].includes(parsed.schemaVersion as number)) {
         throw new Error("Unsupported project draft version");
       }
       const empty = createEmptyProjectDraft();
@@ -201,12 +218,22 @@ function normalizeStep1(value: unknown, empty: ProjectStep1): ProjectStep1 {
 function normalizeStep2(value: unknown, empty: ProjectStep2): ProjectStep2 {
   if (!isRecord(value)) return empty;
   const dimensions = isRecord(value.dimensions) ? value.dimensions : {};
+  const size = isRecord(value.size) ? value.size : {};
   const unit = stringValue(dimensions.unit);
+  const categorySlug = resolveMarketplaceCategorySlug(stringValue(value.categorySlug)) ?? "";
+  const legacyNotes = categorySlug ? "" : [
+    stringArray(value.materials).length ? `Previous materials: ${stringArray(value.materials).join(", ")}` : "",
+    stringValue(value.colorRequirements) ? `Previous color requirements: ${stringValue(value.colorRequirements)}` : "",
+    stringArray(value.customizationOptions).length ? `Previous customization: ${stringArray(value.customizationOptions).join(", ")}` : "",
+    stringValue(value.packagingRequirements) ? `Previous packaging requirements: ${stringValue(value.packagingRequirements)}` : "",
+    stringArray(value.complianceRequirements).length ? `Previous requirements: ${stringArray(value.complianceRequirements).join(", ")}` : "",
+  ].filter(Boolean).join("\n");
   return {
-    productType: stringValue(value.productType), materials: stringArray(value.materials),
+    categorySlug, productType: stringValue(value.productType), primaryDecision: stringValue(value.primaryDecision), secondaryDecision: stringValue(value.secondaryDecision), materials: categorySlug ? stringArray(value.materials) : [],
     dimensions: { length: stringValue(dimensions.length), width: stringValue(dimensions.width), height: stringValue(dimensions.height), unit: ["mm", "cm", "inches"].includes(unit) ? unit : empty.dimensions.unit },
-    colorRequirements: stringValue(value.colorRequirements), customizationOptions: stringArray(value.customizationOptions),
-    packagingRequirements: stringValue(value.packagingRequirements), complianceRequirements: stringArray(value.complianceRequirements), additionalNotes: stringValue(value.additionalNotes),
+    size: { value: stringValue(size.value), unit: stringValue(size.unit) }, textDetail: stringValue(value.textDetail), printingFinishing: stringArray(value.printingFinishing),
+    colorRequirements: categorySlug ? stringValue(value.colorRequirements) : "", customizationOptions: categorySlug ? stringArray(value.customizationOptions) : [],
+    packagingRequirements: categorySlug ? stringValue(value.packagingRequirements) : "", complianceRequirements: categorySlug ? stringArray(value.complianceRequirements) : [], additionalNotes: [stringValue(value.additionalNotes), legacyNotes].filter(Boolean).join("\n\n"),
   };
 }
 
@@ -218,6 +245,15 @@ function normalizeStep3(value: unknown, empty: ProjectStep3): ProjectStep3 {
 function normalizeStep4(value: unknown, empty: ProjectStep4): ProjectStep4 {
   if (!isRecord(value)) return empty;
   return { ...empty, targetDeliveryDate: stringValue(value.targetDeliveryDate), timelineFlexibility: stringValue(value.timelineFlexibility), sampleDeadline: stringValue(value.sampleDeadline), shippingCity: stringValue(value.shippingCity), shippingState: stringValue(value.shippingState), shippingZipCode: stringValue(value.shippingZipCode), shippingCountry: "United States", urgency: stringValue(value.urgency), additionalTimelineNotes: stringValue(value.additionalTimelineNotes) };
+}
+
+export function hasMeaningfulProjectStep2(step2: ProjectStep2) {
+  const empty = createEmptyProjectDraft().step2;
+  return JSON.stringify({ ...step2, categorySlug: "" }) !== JSON.stringify(empty);
+}
+
+export function changeProjectDraftCategory(draft: ProjectDraft, categorySlug: string): ProjectDraft {
+  return { ...draft, categoryMigrationRequired: false, step1: { ...draft.step1, selectedCategory: categorySlug }, step2: { ...createEmptyProjectDraft().step2, categorySlug }, updatedAt: new Date().toISOString() };
 }
 
 export function writeProjectDraft(update: Partial<ProjectDraft>): ProjectDraft {

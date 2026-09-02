@@ -6,7 +6,8 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Check, X } from "lucide-react";
 import Header from "../../../components/Header";
 import { PROJECT_DRAFT_SESSION_KEY, PROJECT_DRAFT_STORAGE_KEY, createEmptyProjectDraft, readProjectDraft, type ProjectDraft } from "../../../lib/project-draft";
-import { formatUSAddress } from "../../../lib/us-marketplace-taxonomy";
+import { formatUSAddress, getMarketplaceCategoryBySlug, resolveMarketplaceCategorySlug } from "../../../lib/us-marketplace-taxonomy";
+import { getTechnicalReviewItems, PROJECT_SPECIFICATIONS } from "../../../lib/project-specifications";
 
 function ProgressBar() {
   const steps = ["Product Category", "Technical Details", "Quantity & Budget", "Timeline", "Review"];
@@ -29,6 +30,9 @@ export default function ReviewPage() {
   const [confirmSubmit, setConfirmSubmit] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const categorySlug = resolveMarketplaceCategorySlug(draft.step1.selectedCategory);
+  const category = getMarketplaceCategoryBySlug(categorySlug);
+  const technicalItems = categorySlug ? getTechnicalReviewItems(draft.step2, PROJECT_SPECIFICATIONS[categorySlug]) : [];
 
   useEffect(() => { const loadDraft = () => setDraft(readProjectDraft() ?? createEmptyProjectDraft()); loadDraft(); }, []);
 
@@ -43,8 +47,8 @@ export default function ReviewPage() {
       <ProgressBar />
       <header className="mb-10"><h1 className="text-4xl font-bold tracking-tight text-[#111111]">Review your project</h1><p className="mt-4 max-w-2xl text-lg leading-relaxed text-[#7C7A74]">Check the full production brief before completing this frontend submission flow.</p></header>
       <div className="space-y-6">
-        <ReviewSection title="Product Category" editHref="/post-project"><Item label="Category" value={draft.step1.selectedCategory} /><Item label="Project title" value={draft.step1.projectTitle} /><div className="sm:col-span-2"><Item label="Product description" value={draft.step1.description} /></div><Item label="Reference files" value={draft.step1.referenceImages.length ? draft.step1.referenceImages.map((image) => image.name).join(", ") : "Not provided"} /></ReviewSection>
-        <ReviewSection title="Technical Details" editHref="/post-project/details"><Item label="Product type or model" value={draft.step2.productType} /><Item label="Materials" value={list(draft.step2.materials)} /><Item label="Dimensions" value={[draft.step2.dimensions.length, draft.step2.dimensions.width, draft.step2.dimensions.height].some(Boolean) ? `${draft.step2.dimensions.length || "–"} × ${draft.step2.dimensions.width || "–"} × ${draft.step2.dimensions.height || "–"} ${draft.step2.dimensions.unit}` : "Not provided"} /><Item label="Colors" value={draft.step2.colorRequirements} /><Item label="Customization" value={list(draft.step2.customizationOptions)} /><Item label="Compliance" value={list(draft.step2.complianceRequirements)} /><Item label="Packaging" value={draft.step2.packagingRequirements} /><Item label="Additional notes" value={draft.step2.additionalNotes} /></ReviewSection>
+        <ReviewSection title="Product Category" editHref="/post-project"><Item label="Category" value={category?.name} /><Item label="Project title" value={draft.step1.projectTitle} /><div className="sm:col-span-2"><Item label="Product description" value={draft.step1.description} /></div><Item label="Reference files" value={draft.step1.referenceImages.length ? draft.step1.referenceImages.map((image) => image.name).join(", ") : "Not provided"} /></ReviewSection>
+        <ReviewSection title="Technical Details" editHref="/post-project/details">{technicalItems.map(([label,value])=><Item key={label} label={label} value={value}/>)}</ReviewSection>
         <ReviewSection title="Quantity & Budget" editHref="/post-project/quantity-budget"><Item label="Order quantity" value={draft.step3.orderQuantity} /><Item label="Quantity flexibility" value={draft.step3.quantityFlexibility} /><Item label="Minimum budget" value={draft.step3.minimumBudget ? `${draft.step3.minimumBudget} ${draft.step3.currency}` : "Not provided"} /><Item label="Maximum budget" value={draft.step3.maximumBudget ? `${draft.step3.maximumBudget} ${draft.step3.currency}` : "Not provided"} /><Item label="Budget type" value={draft.step3.budgetType} /><Item label="Sample budget" value={draft.step3.sampleBudget ? `${draft.step3.sampleBudget} ${draft.step3.currency}` : "Not provided"} /><Item label="Price priorities" value={list(draft.step3.pricePriorities)} /><Item label="Budget notes" value={draft.step3.additionalBudgetNotes} /></ReviewSection>
         <ReviewSection title="Timeline" editHref="/post-project/timeline"><Item label="Target delivery" value={draft.step4.targetDeliveryDate} /><Item label="Flexibility" value={draft.step4.timelineFlexibility} /><Item label="Sample deadline" value={draft.step4.sampleDeadline} /><Item label="Shipping destination" value={formatUSAddress(draft.step4.shippingCity,draft.step4.shippingState,draft.step4.shippingZipCode,draft.step4.shippingCountry)} /><Item label="Urgency" value={draft.step4.urgency} /><Item label="Timeline notes" value={draft.step4.additionalTimelineNotes} /></ReviewSection>
       </div>

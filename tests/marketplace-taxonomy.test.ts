@@ -3,6 +3,8 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 import { allManufacturers, getNavigationHref, manufacturerMatchesCategorySlug, manufacturers } from "../lib/marketplace-data.ts";
 import { MARKETPLACE_CATEGORIES, resolveMarketplaceCategorySlug, SUPPLIER_TYPES } from "../lib/us-marketplace-taxonomy.ts";
+import { PROJECT_SPECIFICATIONS, getTechnicalReviewItems, isMakerGuidance, validateProjectSpecifications } from "../lib/project-specifications.ts";
+import { PROJECT_DRAFT_STORAGE_KEY, changeProjectDraftCategory, createEmptyProjectDraft, readProjectDraft } from "../lib/project-draft.ts";
 
 test("the launch taxonomy contains exactly four canonical categories", () => {
   assert.deepEqual(MARKETPLACE_CATEGORIES.map(({ name, slug }) => ({ name, slug })), [
@@ -13,7 +15,6 @@ test("the launch taxonomy contains exactly four canonical categories", () => {
   ]);
   assert.equal(new Set(MARKETPLACE_CATEGORIES.map((category) => category.slug)).size, 4);
 });
-
 test("URL category values resolve safely and filter the published profiles", () => {
   assert.equal(resolveMarketplaceCategorySlug("candles-home-fragrance"), "candles-home-fragrance");
   assert.equal(resolveMarketplaceCategorySlug("not-a-category"), null);
@@ -49,5 +50,54 @@ test("project and manufacturer application entry pages use the shared full heade
     const source = readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
     assert.match(source, /<Header\s*\/>/);
     assert.doesNotMatch(source, /<Header\s+compact/);
+  }
+});
+
+test("each launch category has an isolated technical specification", () => {
+  assert.deepEqual(Object.keys(PROJECT_SPECIFICATIONS).sort(), MARKETPLACE_CATEGORIES.map((category)=>category.slug).sort());
+  assert.equal(PROJECT_SPECIFICATIONS["beauty-personal-care"].primaryOptions.includes("Corrugated fiberboard"), false);
+  assert.equal(PROJECT_SPECIFICATIONS["candles-home-fragrance"].customizationOptions?.includes("Embroidery"), false);
+  assert.equal(PROJECT_SPECIFICATIONS["custom-packaging"].primaryOptions.includes("Steel"), false);
+  assert.equal(PROJECT_SPECIFICATIONS["textile-accessories-pouches"].primaryOptions.includes("Soy wax"), false);
+});
+
+test("maker guidance satisfies the required technical decisions", () => {
+  assert.equal(isMakerGuidance("Not sure â€” need maker guidance"), true);
+  assert.equal(isMakerGuidance("Maker recommendation"), true);
+  assert.deepEqual(validateProjectSpecifications({...createEmptyProjectDraft().step2,productType:"Not sure — need maker guidance",primaryDecision:"Maker recommendation"}), { productType: "", primaryDecision: "" });
+  assert.notEqual(validateProjectSpecifications(createEmptyProjectDraft().step2).productType, "");
+});
+
+test("technical review uses category labels and omits unrelated empty fields", () => {
+  const step2={...createEmptyProjectDraft().step2,categorySlug:"custom-packaging",productType:"Mailer box",primaryDecision:"Maker recommendation"};
+  const items=getTechnicalReviewItems(step2,PROJECT_SPECIFICATIONS["custom-packaging"]);
+  assert.deepEqual(items.slice(0,2),[["Packaging type","Mailer box"],["Material","Maker recommendation"]]);
+  assert.equal(items.some(([label])=>label==="Fragrance requirements"),false);
+  assert.equal(items.some(([,value])=>value==="Maker guidance requested"),true);
+});
+
+test("changing category clears only technical details", () => {
+  const draft=createEmptyProjectDraft(); draft.step1={...draft.step1,selectedCategory:"beauty-personal-care",projectTitle:"Serum",description:"Test"}; draft.step2={...draft.step2,categorySlug:"beauty-personal-care",productType:"Face serum",primaryDecision:"Fully custom formula"}; draft.step3.orderQuantity="500"; draft.step4.shippingState="NY";
+  const changed=changeProjectDraftCategory(draft,"custom-packaging");
+  assert.equal(changed.step1.projectTitle,"Serum"); assert.equal(changed.step3.orderQuantity,"500"); assert.equal(changed.step4.shippingState,"NY"); assert.equal(changed.step2.productType,""); assert.equal(changed.step2.categorySlug,"custom-packaging");
+});
+
+test("legacy technical data is safe across repeated draft reads", () => {
+  const values=new Map<string,string>();
+  const storage={getItem:(key:string)=>values.get(key)??null,setItem:(key:string,value:string)=>values.set(key,value),removeItem:(key:string)=>values.delete(key)};
+  const previous=Object.getOwnPropertyDescriptor(globalThis,"window");
+  Object.defineProperty(globalThis,"window",{configurable:true,value:{localStorage:storage,sessionStorage:storage}});
+  try {
+    const legacy=createEmptyProjectDraft() as unknown as Record<string,unknown>;
+    legacy.schemaVersion=4;
+    const legacyStep2={...(legacy.step2 as Record<string,unknown>),categorySlug:undefined,materials:["Steel"],customizationOptions:["Engraving"],colorRequirements:"Pantone 123"};
+    legacy.step2=legacyStep2;
+    storage.setItem(PROJECT_DRAFT_STORAGE_KEY,JSON.stringify(legacy));
+    const first=readProjectDraft(); const refreshed=readProjectDraft();
+    assert.equal(first?.step2.primaryDecision,"");
+    assert.match(first?.step2.additionalNotes??"",/Previous materials: Steel/);
+    assert.deepEqual(refreshed?.step2,first?.step2);
+  } finally {
+    if(previous)Object.defineProperty(globalThis,"window",previous); else Reflect.deleteProperty(globalThis,"window");
   }
 });

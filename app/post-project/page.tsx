@@ -8,8 +8,10 @@ import Header from "../../components/Header";
 import { MARKETPLACE_CATEGORIES } from "../../lib/us-marketplace-taxonomy";
 import {
   PROJECT_DRAFT_STORAGE_KEY,
+  changeProjectDraftCategory,
   createEmptyProjectDraft,
   hasMeaningfulProjectDraft,
+  hasMeaningfulProjectStep2,
   readProjectDraft,
   writeProjectDraft,
 } from "../../lib/project-draft";
@@ -45,6 +47,7 @@ export default function PostProjectPage() {
   const [message, setMessage] = useState<string | null>(null);
   const [hasDraft, setHasDraft] = useState(false);
   const [showClearConfirmation, setShowClearConfirmation] = useState(false);
+  const [pendingCategory, setPendingCategory] = useState<string | null>(null);
   const [errors, setErrors] = useState({
     selectedCategory: "",
     projectTitle: "",
@@ -191,6 +194,28 @@ export default function PostProjectPage() {
     setMessage("Draft cleared.");
   };
 
+  const selectCategory = useCallback((category: string) => {
+    if (category === selectedCategory) return;
+    const draft = readProjectDraft();
+    if (draft?.step1.selectedCategory && draft.step1.selectedCategory !== category && hasMeaningfulProjectStep2(draft.step2)) {
+      setPendingCategory(category);
+      return;
+    }
+    setSelectedCategory(category);
+    setErrors((current) => ({ ...current, selectedCategory: "" }));
+  }, [selectedCategory]);
+
+  const confirmCategoryChange = () => {
+    if (!pendingCategory) return;
+    const draft = readProjectDraft() ?? createEmptyProjectDraft();
+    const changed = changeProjectDraftCategory({ ...draft, step1: { ...draft.step1, projectTitle, description, referenceImages: previews.map(({ name, isPdf }) => ({ name, isPdf })) } }, pendingCategory);
+    setSelectedCategory(pendingCategory);
+    writeProjectDraft(changed);
+    setErrors((current) => ({ ...current, selectedCategory: "" }));
+    setPendingCategory(null);
+    setMessage("Category changed. Incompatible technical details were cleared.");
+  };
+
   const categoryCards = useMemo(
     () =>
       categories.map((category) => {
@@ -199,7 +224,7 @@ export default function PostProjectPage() {
           <button
             key={category.id}
             type="button"
-            onClick={() => { setSelectedCategory(category.id); setErrors((current) => ({ ...current, selectedCategory: "" })); }}
+            onClick={() => selectCategory(category.id)}
             className={`group p-5 rounded-2xl text-left relative transition-all ${
               isSelected
                 ? "border-2 border-[#7C8A6A] bg-[#EEF1E8] shadow-md"
@@ -234,7 +259,7 @@ export default function PostProjectPage() {
           </button>
         );
       }),
-    [selectedCategory],
+    [selectCategory, selectedCategory],
   );
 
   return (
@@ -568,6 +593,16 @@ export default function PostProjectPage() {
               <button type="button" onClick={() => setShowClearConfirmation(false)} className="rounded-full border border-[#E5E0D8] bg-white px-6 py-3 text-sm font-semibold text-[#1F2937] transition hover:bg-[#EEF1E8]">Cancel</button>
               <button type="button" onClick={clearDraft} className="rounded-full bg-[#7C8A6A] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#667255]">Clear draft</button>
             </div>
+          </div>
+        </div>
+      ) : null}
+
+      {pendingCategory ? (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#111111]/40 p-6 backdrop-blur-sm" onMouseDown={(event) => { if (event.target === event.currentTarget) setPendingCategory(null); }}>
+          <div role="dialog" aria-modal="true" aria-labelledby="change-category-title" className="w-full max-w-lg rounded-[32px] border border-[#E5E0D8] bg-[#F6F3EE] p-6 shadow-2xl sm:p-8" onMouseDown={(event) => event.stopPropagation()}>
+            <h2 id="change-category-title" className="text-3xl font-semibold text-[#111111]">Change category?</h2>
+            <p className="mt-4 text-sm leading-7 text-[#7C7A74]">Technical details from the previous category will be cleared. Your title, description, quantity, budget and timeline will remain saved.</p>
+            <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end"><button type="button" onClick={()=>setPendingCategory(null)} className="rounded-full border border-[#E5E0D8] bg-white px-6 py-3 text-sm font-semibold">Cancel</button><button type="button" onClick={confirmCategoryChange} className="rounded-full bg-[#7C8A6A] px-6 py-3 text-sm font-semibold text-white">Change category</button></div>
           </div>
         </div>
       ) : null}
