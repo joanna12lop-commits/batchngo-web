@@ -19,7 +19,6 @@ import {
   Lock,
   Plus,
   Save,
-  ShieldCheck,
 } from "lucide-react";
 
 const categoryImages=["/images/packaging.png","/images/beauty-skincare.png","/images/candles.png","/images/home-lifestyle.png","/images/gifts.png","/images/textile-accessories.png","/images/bags-pouches.png","/images/notebooks-print.png"];
@@ -515,8 +514,8 @@ export default function PostProjectPage() {
                       Volume & Logistics
                     </h4>
                     <p className="text-xs text-[#7C7A74] leading-relaxed">
-                      Finalize quantities and delivery timelines with verified
-                      makers.
+                      Finalize quantities and delivery timelines for your
+                      production brief.
                     </p>
                   </div>
                 </li>
@@ -526,33 +525,30 @@ export default function PostProjectPage() {
             <div className="bg-white rounded-[2rem] p-8 border border-[#E5E0D8] shadow-sm">
               <div className="flex items-center space-x-4 mb-6">
                 <div className="w-10 h-10 rounded-full bg-[#EEF1E8] flex items-center justify-center text-[#7C8A6A]">
-                  <ShieldCheck size={18} />
+                  <Save size={18} />
                 </div>
                 <h4 className="font-bold text-[#111111] text-sm">
-                  Maker Protection
+                  Prototype draft
                 </h4>
               </div>
               <p className="text-xs text-[#7C7A74] leading-relaxed mb-6">
-                BatchNGo only shares your project with{" "}
-                <span className="font-bold text-[#111111]">
-                  verified makers
-                </span>{" "}
-                who match your specific category. Your idea is protected by our
-                non-disclosure terms.
+                This prototype saves your project draft locally on this device.
+                It is not sent to manufacturers while the submission workflow
+                is still being connected.
               </p>
               <div className="flex items-center space-x-2 text-[10px] font-bold text-[#7C8A6A] uppercase tracking-widest">
-                <Lock size={12} />
-                <span>End-to-end Encrypted</span>
+                <Save size={12} />
+                <span>Stored locally on this device</span>
               </div>
             </div>
 
             <div className="p-8 rounded-[2rem] bg-[#F6F3EE]/30 border border-[#E5E0D8] text-center">
               <p className="text-sm font-medium text-[#7C7A74] mb-4">
-                Need help defining your project?
+                Want to explore potential production partners?
               </p>
-              <button className="text-xs font-bold text-[#111111] hover:text-[#7C8A6A] transition-colors underline decoration-[#7C8A6A]/30 underline-offset-4 uppercase tracking-widest">
-                Talk to a specialist
-              </button>
+              <Link href="/find-makers" className="text-xs font-bold text-[#111111] hover:text-[#7C8A6A] transition-colors underline decoration-[#7C8A6A]/30 underline-offset-4 uppercase tracking-widest">
+                Browse makers
+              </Link>
             </div>
           </aside>
         </div>
@@ -574,7 +570,7 @@ export default function PostProjectPage() {
 
       <footer className="py-16 border-t border-[#E5E0D8] px-8 bg-white">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center text-[11px] uppercase tracking-[0.2em] font-bold text-[#7C7A74]/60 space-y-6 md:space-y-0">
-          <p>© 2024 BatchNGo Marketplace</p>
+          <p>© {new Date().getFullYear()} BatchNGo Marketplace</p>
           <div className="flex flex-wrap justify-center gap-6">
             <Link
               href="/support"

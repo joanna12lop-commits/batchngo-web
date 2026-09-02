@@ -113,7 +113,7 @@ export default function Footer() {
         </div>
 
         <div className="mt-10 flex flex-col gap-4 border-t border-[#E5E0D8] pt-6 text-sm text-[#7C7A74] sm:flex-row sm:items-center sm:justify-between">
-          <p>© 2024 BatchNGo Marketplace. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} BatchNGo Marketplace. All rights reserved.</p>
           <div className="flex flex-wrap gap-6">
             <Link href="/privacy" className="transition hover:text-[#111111]">
               Privacy

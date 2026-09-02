@@ -10,11 +10,11 @@ export default function ExampleProjects() {
             Featured projects
           </p>
           <h2 className="mt-4 text-3xl font-semibold tracking-tight text-[#111111] sm:text-4xl">
-            Real orders from boutique brands.
+            Example small-batch projects
           </h2>
           <p className="mt-4 text-base leading-8 text-[#7C7A74]">
-            See the kinds of small-batch runs brands are sourcing through the
-            marketplace.
+            Explore examples of the production projects you can prepare in
+            BatchNGo. These are illustrative briefs, not completed orders.
           </p>
         </div>
 

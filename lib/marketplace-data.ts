@@ -124,23 +124,23 @@ export const trustItems: Array<{
   icon: LucideIcon;
 }> = [
   {
-    title: "Verified makers",
-    description: "Trade only with vetted small-batch manufacturers.",
+    title: "Curated maker profiles",
+    description: "Explore structured profiles for small-batch manufacturers.",
     icon: ShieldCheck,
   },
   {
-    title: "Sample approval",
-    description: "Approve every sample before production begins.",
+    title: "Sample planning",
+    description: "Document sample expectations before production begins.",
     icon: CheckCircle2,
   },
   {
-    title: "Secure milestone payments",
-    description: "Release funds only when each milestone is met.",
+    title: "Structured production milestones",
+    description: "Plan clear checkpoints for each production stage.",
     icon: Lock,
   },
   {
-    title: "Order protection",
-    description: "Guarantees for quality, timing, and custom specs.",
+    title: "Transparent project workflow",
+    description: "Keep requirements, timing, and custom specifications clear.",
     icon: Package,
   },
 ];
@@ -148,7 +148,7 @@ export const trustItems: Array<{
 export const categories: CategoryItem[] = [
   {
     title: "Candles",
-    description: "Warm scents, custom labels and small-batch batches.",
+    description: "Warm scents, custom labels and flexible production runs.",
     moq: "MOQ 100 pcs",
     icon: Flame,
     image: "/images/candles.png",
@@ -206,23 +206,23 @@ export const categories: CategoryItem[] = [
 
 export const howItWorksSteps = [
   {
-    title: "Post your project",
-    description: "Share your product idea, volume and packaging needs.",
+    title: "Prepare your brief",
+    description: "Organize your product idea, volume and packaging needs.",
     icon: FileText,
   },
   {
-    title: "Compare maker quotes",
-    description: "Review offers with price, MOQ and sample options.",
+    title: "Explore maker profiles",
+    description: "Review capabilities, MOQ and sample availability.",
     icon: Sparkles,
   },
   {
-    title: "Approve your sample",
-    description: "Confirm the sample design before full production.",
+    title: "Plan your sample",
+    description: "Document sample expectations before full production.",
     icon: CheckCircle2,
   },
   {
-    title: "Start production",
-    description: "Launch your batch with milestone-based delivery.",
+    title: "Document next steps",
+    description: "Prepare clear milestones for future production discussions.",
     icon: Truck,
   },
 ];

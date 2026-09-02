@@ -22,7 +22,7 @@ export default function MakerCard({ maker }: { maker: MakerCardItem }) {
             <p className="mt-1 text-sm text-[#7C7A74]">{maker.specialty}</p>
           </div>
           <span className="rounded-full bg-[#EAF2EC] px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-[#3F684F]">
-            Verified
+            Curated profile
           </span>
         </div>
         <div className="flex flex-wrap gap-2">

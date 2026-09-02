@@ -100,10 +100,10 @@ export default function FindMakersPage() {
                   Find Makers
                 </p>
                 <h1 className="mt-4 text-4xl font-semibold tracking-tight text-[#111111] sm:text-5xl">
-                  Find verified small-batch makers
+                  Explore small-batch maker profiles
                 </h1>
                 <p className="mt-4 max-w-2xl text-base leading-8 text-[#7C7A74]">
-                  Search and filter verified makers by category, location, MOQ,
+                  Search and filter curated maker profiles by category, location, MOQ,
                   lead time and sample availability.
                 </p>
               </div>
@@ -263,7 +263,7 @@ export default function FindMakersPage() {
                           }
                           className="h-4 w-4 rounded border-[#E5E0D8] text-[#7C8A6A] focus:ring-[#7C8A6A]"
                         />
-                        Verified only
+                        Curated profiles only
                       </label>
                     </div>
                   </div>
@@ -297,7 +297,7 @@ export default function FindMakersPage() {
                   </h2>
                   <p className="mt-4 text-sm leading-7 text-[#7C7A74]">
                     No makers match the current criteria. Reset filters to see
-                    more verified small-batch makers.
+                    more small-batch maker profiles.
                   </p>
                   <button
                     type="button"

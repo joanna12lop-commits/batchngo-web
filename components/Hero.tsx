@@ -3,9 +3,9 @@ import Link from "next/link";
 import { BadgeCheck } from "lucide-react";
 
 const benefitItems = [
-  "Verified makers",
-  "Sample approval",
-  "Protected payments",
+  "Curated maker profiles",
+  "Sample planning",
+  "Clear project briefs",
 ];
 
 export default function Hero() {
@@ -24,8 +24,8 @@ export default function Hero() {
           </h1>
           <p className="mt-8 max-w-2xl text-xl leading-8 text-[#1F2937] sm:text-2xl">
             The premium marketplace for emerging brands and creators. Post your
-            project, compare verified makers, and approve samples with
-            confidence.
+            project, explore curated maker profiles, and prepare clear
+            production requirements.
           </p>
 
           <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center">

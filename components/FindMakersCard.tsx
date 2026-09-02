@@ -26,11 +26,11 @@ export default function FindMakersCard({ maker }: { maker: Manufacturer }) {
           </div>
           {maker.verified ? (
             <span className="rounded-full bg-[#EAF2EC] px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-[#3F684F]">
-              VERIFIED
+              CURATED PROFILE
             </span>
           ) : (
             <span className="rounded-full bg-[#F1EEE8] px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-[#7C7A74]">
-              NOT VERIFIED
+              EXAMPLE PROFILE
             </span>
           )}
         </div>

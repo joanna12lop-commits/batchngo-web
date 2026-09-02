@@ -1,10 +1,10 @@
 import { CheckCircle2, ShieldCheck, ShieldAlert, Truck } from "lucide-react";
 
 const trustItems = [
-  { title: "Verified makers", icon: ShieldCheck },
-  { title: "Sample approval", icon: CheckCircle2 },
-  { title: "Protected milestone payments", icon: ShieldAlert },
-  { title: "Order protection", icon: Truck },
+  { title: "Curated maker profiles", icon: ShieldCheck },
+  { title: "Sample planning", icon: CheckCircle2 },
+  { title: "Structured production milestones", icon: ShieldAlert },
+  { title: "Transparent project workflow", icon: Truck },
 ];
 
 export default function TrustBar() {

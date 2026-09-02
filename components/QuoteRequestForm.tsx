@@ -54,8 +54,8 @@ export default function QuoteRequestForm({ slug }: { slug: string }) {
       <label className="block text-sm font-semibold text-[#1F2937]">Target timeline<input required value={draft.targetTimeline} onChange={(event) => update("targetTimeline", event.target.value)} className={inputClass} placeholder="e.g. Delivery by October" /></label>
       <label className="block text-sm font-semibold text-[#1F2937]">Short message<textarea required rows={6} value={draft.message} onChange={(event) => update("message", event.target.value)} className={inputClass} placeholder="Describe the product, materials, customization and delivery needs." /></label>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <button type="submit" className="inline-flex items-center justify-center rounded-full bg-[#7C8A6A] px-8 py-4 text-sm font-semibold text-white transition hover:bg-[#667255] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7C8A6A]">Save request</button>
-        {saved ? <p role="status" className="text-sm font-medium text-[#3F684F]">Your request has been saved on this device.</p> : null}
+        <button type="submit" className="inline-flex items-center justify-center rounded-full bg-[#7C8A6A] px-8 py-4 text-sm font-semibold text-white transition hover:bg-[#667255] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7C8A6A]">Save draft locally</button>
+        {saved ? <p role="status" className="text-sm font-medium text-[#3F684F]">Draft saved on this device. It has not been sent to the maker.</p> : null}
       </div>
     </form>
   );

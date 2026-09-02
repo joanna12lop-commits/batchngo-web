@@ -12,8 +12,8 @@ export default function FinalCTA() {
             Ready to bring your brand to life?
           </h2>
           <p className="mx-auto mt-6 max-w-2xl text-base leading-8 text-[#7C7A74] sm:text-lg">
-            Join thousands of creators and emerging brands launching their first
-            batch on BatchNGo.
+            Prepare your project brief and explore small-batch production
+            partners for your next product idea.
           </p>
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link
@@ -26,7 +26,7 @@ export default function FinalCTA() {
               href="/find-makers"
               className="inline-flex items-center justify-center rounded-full border border-[#E5E0D8] bg-white px-8 py-4 text-sm font-semibold text-[#1F2937] transition hover:border-[#7C8A6A] hover:bg-[#F6F3EE] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7C8A6A]"
             >
-              Talk to an expert
+              Explore makers
             </Link>
           </div>
         </div>

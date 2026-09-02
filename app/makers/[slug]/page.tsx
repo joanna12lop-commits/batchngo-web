@@ -15,7 +15,7 @@ export function generateStaticParams() {
   return manufacturers.map(({ slug }) => ({ slug }));
 }
 
-function VerificationBadge({ verified }: { verified: boolean }) {
+function ProfileBadge({ verified }: { verified: boolean }) {
   return (
     <span
       className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] ${
@@ -24,7 +24,7 @@ function VerificationBadge({ verified }: { verified: boolean }) {
           : "bg-[#F1EEE8] text-[#7C7A74]"
       }`}
     >
-      {verified ? "VERIFIED" : "NOT VERIFIED"}
+      {verified ? "CURATED PROFILE" : "EXAMPLE PROFILE"}
     </span>
   );
 }
@@ -104,7 +104,7 @@ export default async function MakerProfilePage({ params }: PageProps<"/makers/[s
           </div>
 
           <div className="flex flex-col justify-center">
-            <div className="flex flex-wrap items-center gap-3"><VerificationBadge verified={maker.verified} /><span className="rounded-full bg-[#EEF1E8] px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-[#7C8A6A]">{maker.supplierType}</span></div>
+            <div className="flex flex-wrap items-center gap-3"><ProfileBadge verified={maker.verified} /><span className="rounded-full bg-[#EEF1E8] px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-[#7C8A6A]">{maker.supplierType}</span></div>
             <h1 className="mt-5 text-4xl font-semibold tracking-tight text-[#111111] sm:text-5xl">{maker.businessName}</h1>
             <p className="mt-3 text-base text-[#7C7A74]">{maker.location}</p>
             <div className="mt-4 flex items-center gap-2 text-sm"><Star size={18} className="text-[#B08B57]" /><strong>{maker.rating.toFixed(1)}</strong><span className="text-[#7C7A74]">({maker.reviewCount} reviews)</span></div>

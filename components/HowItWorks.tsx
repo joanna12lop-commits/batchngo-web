@@ -12,8 +12,8 @@ export default function HowItWorks() {
             Simple, transparent steps from brief to batch.
           </h2>
           <p className="mt-4 text-base leading-8 text-[#7C7A74]">
-            Post your project, review verified maker proposals, approve a
-            sample, and start production with support every step of the way.
+            Prepare a structured brief, explore maker profiles, document sample
+            expectations, and organize your next production steps.
           </p>
         </div>
 
