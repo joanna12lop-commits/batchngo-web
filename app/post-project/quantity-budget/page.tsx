@@ -23,8 +23,8 @@ const pricePriorityOptions = [
 function ProgressBar() {
   const steps = ["Product Category", "Technical Details", "Quantity & Budget", "Timeline", "Review"];
   return (
-    <div className="mb-16 overflow-x-auto no-scrollbar">
-      <div className="flex min-w-[900px] items-center justify-between rounded-2xl border border-[#E5E0D8] bg-white px-10 py-4 shadow-sm">
+    <div className="mb-16 max-w-full overflow-x-auto overscroll-x-contain no-scrollbar">
+      <div className="flex w-max min-w-[900px] items-center justify-between rounded-2xl border border-[#E5E0D8] bg-white px-10 py-4 shadow-sm">
         {steps.map((step, index) => (
           <div key={step} className="contents">
             <div className={`flex items-center space-x-3 ${index > 2 ? "text-[#7C7A74]/60" : "text-[#111111]"}`}>
@@ -108,20 +108,20 @@ export default function QuantityBudgetPage() {
   return (
     <div className="min-h-screen bg-[#F6F3EE] text-[#1F2937]">
       <Header />
-      <main className="mx-auto max-w-7xl px-4 pb-24 pt-32 sm:px-8">
+      <main className="mx-auto w-full min-w-0 max-w-7xl px-4 pb-24 pt-32 sm:px-8">
         <ProgressBar />
-        <div className="grid grid-cols-1 gap-12 lg:grid-cols-[1fr_360px]">
-          <div className="space-y-12">
+        <div className="grid min-w-0 grid-cols-1 gap-12 lg:grid-cols-[1fr_360px]">
+          <div className="min-w-0 space-y-12">
             <div className="rounded-[2rem] border border-[#E5E0D8] bg-white p-6 shadow-sm sm:p-12">
               <header className="mb-12">
-                <h1 className="mb-4 text-4xl font-bold tracking-tight text-[#111111]">Set your quantity and budget</h1>
+                <h1 className="mb-4 break-words text-3xl font-bold tracking-tight sm:text-4xl text-[#111111]">Set your quantity and budget</h1>
                 <p className="max-w-2xl text-lg leading-relaxed text-[#7C7A74]">Share your expected order volume and budget range so makers can prepare relevant production quotes.</p>
               </header>
 
-              <div className="space-y-12">
+              <div className="min-w-0 space-y-12">
                 <div className="grid gap-6 sm:grid-cols-2">
                   <div>
-                    <label htmlFor="order-quantity" className={labelClass}>Order quantity · Required</label>
+                    <label htmlFor="order-quantity" className={labelClass}>Order quantity Â· Required</label>
                     <input ref={quantityRef} id="order-quantity" type="number" min="1" inputMode="numeric" value={step3.orderQuantity} onChange={(event) => update("orderQuantity", event.target.value)} placeholder="e.g. 500" aria-invalid={attempted&&!quantityValid||undefined} aria-describedby={attempted&&!quantityValid?"quantity-error":undefined} className={`${inputClass} ${attempted&&!quantityValid?"border-[#C9826B] bg-[#F5E6E0]/30":""}`} />
                     {attempted&&!quantityValid ? <p id="quantity-error" className="mt-3 text-sm text-[#C9826B]">Enter a quantity greater than 0</p> : null}
                   </div>
@@ -139,8 +139,8 @@ export default function QuantityBudgetPage() {
                 </div>
 
                 <div className="grid gap-6 sm:grid-cols-2">
-                  <div><label htmlFor="currency" className={labelClass}>Currency · Required</label><select ref={currencyRef} id="currency" value={step3.currency} onChange={(event) => update("currency", event.target.value)} aria-invalid={attempted&&!step3.currency||undefined} aria-describedby={attempted&&!step3.currency?"currency-error":undefined} className={`${inputClass} ${attempted&&!step3.currency?"border-[#C9826B] bg-[#F5E6E0]/30":""}`}><option value="USD">USD — U.S. Dollar</option></select>{attempted&&!step3.currency ? <p id="currency-error" className="mt-3 text-sm text-[#C9826B]">Select a currency</p> : null}</div>
-                  <div><label htmlFor="budget-type" className={labelClass}>Budget type · Required</label><select ref={budgetTypeRef} id="budget-type" value={step3.budgetType} onChange={(event) => update("budgetType", event.target.value)} aria-invalid={attempted&&!step3.budgetType||undefined} aria-describedby={attempted&&!step3.budgetType?"budget-type-error":undefined} className={`${inputClass} ${attempted&&!step3.budgetType?"border-[#C9826B] bg-[#F5E6E0]/30":""}`}><option value="">Select budget type</option><option>Total project budget</option><option>Target unit price</option><option>Flexible budget</option></select>{attempted&&!step3.budgetType ? <p id="budget-type-error" className="mt-3 text-sm text-[#C9826B]">Select a budget type</p> : null}</div>
+                  <div><label htmlFor="currency" className={labelClass}>Currency Â· Required</label><select ref={currencyRef} id="currency" value={step3.currency} onChange={(event) => update("currency", event.target.value)} aria-invalid={attempted&&!step3.currency||undefined} aria-describedby={attempted&&!step3.currency?"currency-error":undefined} className={`${inputClass} ${attempted&&!step3.currency?"border-[#C9826B] bg-[#F5E6E0]/30":""}`}><option value="USD">USD â€” U.S. Dollar</option></select>{attempted&&!step3.currency ? <p id="currency-error" className="mt-3 text-sm text-[#C9826B]">Select a currency</p> : null}</div>
+                  <div><label htmlFor="budget-type" className={labelClass}>Budget type Â· Required</label><select ref={budgetTypeRef} id="budget-type" value={step3.budgetType} onChange={(event) => update("budgetType", event.target.value)} aria-invalid={attempted&&!step3.budgetType||undefined} aria-describedby={attempted&&!step3.budgetType?"budget-type-error":undefined} className={`${inputClass} ${attempted&&!step3.budgetType?"border-[#C9826B] bg-[#F5E6E0]/30":""}`}><option value="">Select budget type</option><option>Total project budget</option><option>Target unit price</option><option>Flexible budget</option></select>{attempted&&!step3.budgetType ? <p id="budget-type-error" className="mt-3 text-sm text-[#C9826B]">Select a budget type</p> : null}</div>
                 </div>
 
                 <div><label htmlFor="sample-budget" className={labelClass}>Sample budget</label><input id="sample-budget" type="number" min="0" inputMode="decimal" value={step3.sampleBudget} onChange={(event) => update("sampleBudget", event.target.value)} placeholder="e.g. 150" className={inputClass} /></div>
@@ -156,9 +156,9 @@ export default function QuantityBudgetPage() {
               </div>
             </div>
 
-            <div className="flex flex-col gap-4 py-6 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex min-w-0 flex-col gap-4 py-6 sm:flex-row sm:items-center sm:justify-between">
               <Link href="/post-project/details" className="inline-flex items-center justify-center rounded-full border border-[#E5E0D8] px-8 py-4 text-sm font-bold uppercase tracking-widest text-[#7C7A74] transition-all hover:border-[#111111] hover:text-[#111111]"><ArrowLeft size={16} className="mr-2" />Back</Link>
-              <div className="flex flex-col gap-4 sm:flex-row">
+              <div className="flex min-w-0 flex-col gap-4 sm:flex-row">
                 <button type="button" onClick={saveDraft} className="inline-flex items-center justify-center rounded-full border border-[#E5E0D8] px-8 py-4 text-sm font-bold uppercase tracking-widest text-[#7C7A74] transition-all hover:border-[#111111] hover:text-[#111111]"><Save size={16} className="mr-2" />Save as draft</button>
                 <button type="button" onClick={nextStep} className="flex items-center justify-center rounded-full bg-[#7C8A6A] px-12 py-5 text-lg font-bold text-white shadow-xl shadow-[#7C8A6A]/10 transition-all hover:bg-[#667255]">Next Step<ArrowRight size={18} className="ml-3" /></button>
               </div>

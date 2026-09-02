@@ -55,9 +55,9 @@ function QuotePanel({ maker }: { maker: Manufacturer }) {
     <div className="rounded-[32px] border border-[#E5E0D8] bg-white p-6 shadow-sm lg:sticky lg:top-24">
       <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[#7C8A6A]">Request a quote</p>
       <div className="mt-6 space-y-4 border-y border-[#E5E0D8] py-5 text-sm">
-        <div className="flex justify-between gap-4"><span className="text-[#7C7A74]">Starting MOQ</span><strong>{maker.moq}</strong></div>
-        <div className="flex justify-between gap-4"><span className="text-[#7C7A74]">Lead time</span><strong>{maker.leadTime}</strong></div>
-        <div className="flex justify-between gap-4"><span className="text-[#7C7A74]">Samples</span><strong>{yesNo(maker.sampleAvailable)}</strong></div>
+        <div className="flex min-w-0 flex-wrap justify-between gap-2"><span className="text-[#7C7A74]">Starting MOQ</span><strong className="break-words text-right">{maker.moq}</strong></div>
+        <div className="flex min-w-0 flex-wrap justify-between gap-2"><span className="text-[#7C7A74]">Lead time</span><strong className="break-words text-right">{maker.leadTime}</strong></div>
+        <div className="flex min-w-0 flex-wrap justify-between gap-2"><span className="text-[#7C7A74]">Samples</span><strong className="break-words text-right">{yesNo(maker.sampleAvailable)}</strong></div>
       </div>
       <p className="mt-5 text-sm leading-7 text-[#7C7A74]">Tell this maker what you want to produce and request a quote.</p>
       <Link href={`/request-quote/${maker.slug}`} className="mt-6 inline-flex w-full items-center justify-center rounded-full bg-[#7C8A6A] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#667255] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7C8A6A]">

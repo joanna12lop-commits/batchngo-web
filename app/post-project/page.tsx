@@ -253,7 +253,7 @@ export default function PostProjectPage() {
             </span>
             {isSelected ? (
               <div className="absolute top-3 right-3 w-6 h-6 bg-[#7C8A6A] rounded-full flex items-center justify-center text-white shadow-sm">
-                <span className="text-[10px]">✓</span>
+                <span className="text-[10px]">âœ“</span>
               </div>
             ) : null}
           </button>
@@ -266,8 +266,8 @@ export default function PostProjectPage() {
     <div className="min-h-screen bg-[#F6F3EE] text-[#1F2937]">
       <Header />
       <main className="pt-32 pb-24 px-8 max-w-7xl mx-auto">
-        <div className="mb-16 overflow-x-auto no-scrollbar">
-          <div className="flex items-center justify-between min-w-[900px] py-4 bg-white rounded-2xl px-10 border border-[#E5E0D8] shadow-sm">
+        <div className="mb-16 max-w-full overflow-x-auto overscroll-x-contain no-scrollbar">
+          <div className="flex w-max items-center justify-between min-w-[900px] py-4 bg-white rounded-2xl px-10 border border-[#E5E0D8] shadow-sm">
             <div className="flex items-center space-x-3 text-[#111111]">
               <span className="step-num w-8 h-8 rounded-full border border-[#E5E0D8] flex items-center justify-center text-xs font-bold bg-[#7C8A6A] text-white">
                 1
@@ -336,7 +336,7 @@ export default function PostProjectPage() {
                     Required
                   </span>
                 </div>
-                <div ref={categoryRef} tabIndex={-1} aria-invalid={Boolean(errors.selectedCategory)} aria-describedby={errors.selectedCategory ? "category-error" : undefined} className={`grid grid-cols-2 sm:grid-cols-4 gap-5 rounded-2xl outline-none ${errors.selectedCategory ? "ring-2 ring-[#C9826B]/40" : ""}`}>
+                <div ref={categoryRef} tabIndex={-1} aria-invalid={Boolean(errors.selectedCategory)} aria-describedby={errors.selectedCategory ? "category-error" : undefined} className={`grid grid-cols-1 sm:grid-cols-4 gap-5 rounded-2xl outline-none ${errors.selectedCategory ? "ring-2 ring-[#C9826B]/40" : ""}`}>
                   {categoryCards}
                 </div>
                 {errors.selectedCategory ? <p id="category-error" className="mt-3 text-sm text-[#C9826B]">{errors.selectedCategory}</p> : null}
@@ -347,7 +347,7 @@ export default function PostProjectPage() {
                   htmlFor="project-title"
                   className="block text-sm font-bold uppercase tracking-widest text-[#1F2937] mb-4"
                 >
-                  Project Title · Required
+                  Project Title Â· Required
                 </label>
                 <input
                   id="project-title"
@@ -376,7 +376,7 @@ export default function PostProjectPage() {
                   htmlFor="description"
                   className="block text-sm font-bold uppercase tracking-widest text-[#1F2937] mb-4"
                 >
-                  Product Description · Required
+                  Product Description Â· Required
                 </label>
                 <textarea
                   id="description"
@@ -400,7 +400,7 @@ export default function PostProjectPage() {
                 <label className="block text-sm font-bold uppercase tracking-widest text-[#1F2937] mb-6">
                   Reference Images & Moodboard
                 </label>
-                <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-5">
+                <div className="grid grid-cols-1 sm:grid-cols-4 lg:grid-cols-5 gap-5">
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
@@ -465,8 +465,8 @@ export default function PostProjectPage() {
               </div>
             </div>
 
-            <div className="flex items-center justify-between py-6">
-              <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center">
+            <div className="flex min-w-0 flex-col gap-4 py-6 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center">
                 <button
                   type="button"
                   onClick={handleSaveDraft}
@@ -481,11 +481,11 @@ export default function PostProjectPage() {
                   </button>
                 ) : null}
               </div>
-              <div className="flex items-center space-x-6">
+              <div className="flex min-w-0 flex-col sm:flex-row">
                 <button
                   type="button"
                   onClick={handleNextStep}
-                  className="bg-[#7C8A6A] text-white px-12 py-5 rounded-full font-bold text-lg hover:bg-[#667255] shadow-xl shadow-[#7C8A6A]/10 transition-all flex items-center"
+                  className="flex w-full items-center justify-center rounded-full bg-[#7C8A6A] px-8 py-5 text-lg font-bold text-white shadow-xl shadow-[#7C8A6A]/10 transition-all hover:bg-[#667255] sm:w-auto sm:px-12"
                 >
                   Next Step
                   <ArrowRight size={18} className="ml-3" />
@@ -609,7 +609,7 @@ export default function PostProjectPage() {
 
       <footer className="py-16 border-t border-[#E5E0D8] px-8 bg-white">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center text-[11px] uppercase tracking-[0.2em] font-bold text-[#7C7A74]/60 space-y-6 md:space-y-0">
-          <p>© {new Date().getFullYear()} BatchNGo Marketplace</p>
+          <p>Â© {new Date().getFullYear()} BatchNGo Marketplace</p>
           <div className="flex flex-wrap justify-center gap-6">
             <Link
               href="/support"

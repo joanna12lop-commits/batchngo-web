@@ -101,3 +101,21 @@ test("legacy technical data is safe across repeated draft reads", () => {
     if(previous)Object.defineProperty(globalThis,"window",previous); else Reflect.deleteProperty(globalThis,"window");
   }
 });
+
+test("post-project layouts constrain wide content to local responsive containers", () => {
+  const files = [
+    "app/post-project/page.tsx",
+    "app/post-project/details/page.tsx",
+    "app/post-project/quantity-budget/page.tsx",
+    "app/post-project/review/page.tsx",
+  ];
+  for (const path of files) {
+    const source = readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
+    assert.match(source, /max-w-full overflow-x-auto/);
+    assert.match(source, /min-w-\[(?:850|900)px\]/);
+  }
+  const timeline = readFileSync(new URL("../app/post-project/timeline/page.tsx", import.meta.url), "utf8");
+  assert.match(timeline, /w-full min-w-0 max-w-5xl/);
+  assert.match(timeline, /block w-full min-w-0 max-w-full/);
+  assert.doesNotMatch(timeline, /overflow-x-hidden/);
+});

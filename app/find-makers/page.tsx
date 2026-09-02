@@ -140,14 +140,14 @@ export default function FindMakersPage() {
                   className="w-full rounded-2xl border border-[#E5E0D8] bg-[#F6F3EE]/60 py-4 pl-12 pr-4 text-base text-[#111111] outline-none transition focus:border-[#7C8A6A] focus:ring-4 focus:ring-[#7C8A6A]/10"
                 />
               </label>
-              <div className="flex items-center gap-3">
-                <span className="rounded-full bg-[#EEF1E8] px-4 py-3 text-sm font-semibold uppercase tracking-[0.24em] text-[#7C8A6A]">
+              <div className="flex min-w-0 flex-col gap-3 min-[420px]:flex-row min-[420px]:items-center">
+                <span className="self-start rounded-full bg-[#EEF1E8] px-4 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-[#7C8A6A] sm:tracking-[0.24em]">
                   Sort by:
                 </span>
                 <select
                   value={sortBy}
                   onChange={(event) => setSortBy(event.target.value)}
-                  className="h-14 min-w-[190px] rounded-2xl border border-[#E5E0D8] bg-white px-4 text-sm text-[#111111] outline-none focus:border-[#7C8A6A] focus:ring-4 focus:ring-[#7C8A6A]/10"
+                  className="h-14 w-full min-w-0 rounded-2xl border border-[#E5E0D8] bg-white px-4 text-sm text-[#111111] outline-none focus:border-[#7C8A6A] focus:ring-4 focus:ring-[#7C8A6A]/10 min-[420px]:w-auto min-[420px]:min-w-[190px]"
                 >
                   {sortOptions.map((option) => (
                     <option key={option} value={option}>
