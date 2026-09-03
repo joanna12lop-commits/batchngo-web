@@ -1,6 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import {
   PROJECT_DRAFT_SESSION_KEY,
   PROJECT_DRAFT_STORAGE_KEY,
@@ -12,6 +18,7 @@ import {
   readManufacturerApplicationDraft,
 } from "../lib/manufacturer-application-draft";
 import { createClient } from "../lib/supabase/client";
+import { syncDraft } from "../lib/draft-sync";
 import { isSupabaseConfigured } from "../lib/supabase/config";
 
 type Kind = "project" | "manufacturer";
@@ -20,23 +27,34 @@ type Status = "idle" | "saving" | "saved" | "offline" | "failed";
 const ownerKey = (kind: Kind) => `batchngo-${kind}-draft-owner`;
 const hydratedKey = (kind: Kind) => `batchngo-${kind}-hydrated`;
 const storageKey = (kind: Kind) =>
-  kind === "project" ? PROJECT_DRAFT_STORAGE_KEY : MANUFACTURER_APPLICATION_DRAFT_STORAGE_KEY;
+  kind === "project"
+    ? PROJECT_DRAFT_STORAGE_KEY
+    : MANUFACTURER_APPLICATION_DRAFT_STORAGE_KEY;
 const sessionKey = (kind: Kind) =>
-  kind === "project" ? PROJECT_DRAFT_SESSION_KEY : MANUFACTURER_APPLICATION_DRAFT_SESSION_KEY;
+  kind === "project"
+    ? PROJECT_DRAFT_SESSION_KEY
+    : MANUFACTURER_APPLICATION_DRAFT_SESSION_KEY;
 
 function separateForeignDraft(kind: Kind, userId: string) {
   const knownOwner = sessionStorage.getItem(ownerKey(kind));
   if (!knownOwner || knownOwner === userId) return;
 
-  const rawDraft = localStorage.getItem(storageKey(kind)) ?? sessionStorage.getItem(sessionKey(kind));
-  if (rawDraft) sessionStorage.setItem(`${sessionKey(kind)}:${knownOwner}`, rawDraft);
+  const rawDraft =
+    localStorage.getItem(storageKey(kind)) ??
+    sessionStorage.getItem(sessionKey(kind));
+  if (rawDraft)
+    sessionStorage.setItem(`${sessionKey(kind)}:${knownOwner}`, rawDraft);
   localStorage.removeItem(storageKey(kind));
   sessionStorage.removeItem(sessionKey(kind));
   sessionStorage.removeItem(hydratedKey(kind));
   sessionStorage.removeItem(ownerKey(kind));
 }
 
-export default function DraftSyncProvider({ children }: { children: ReactNode }) {
+export default function DraftSyncProvider({
+  children,
+}: {
+  children: ReactNode;
+}) {
   const [status, setStatus] = useState<Status>("idle");
   const timers = useRef<Partial<Record<Kind, number>>>({});
 
@@ -46,7 +64,10 @@ export default function DraftSyncProvider({ children }: { children: ReactNode })
       return false;
     }
 
-    const draft = kind === "project" ? readProjectDraft() : readManufacturerApplicationDraft();
+    const draft =
+      kind === "project"
+        ? readProjectDraft()
+        : readManufacturerApplicationDraft();
     if (!draft) return true;
 
     const knownOwner = sessionStorage.getItem(ownerKey(kind));
@@ -56,15 +77,8 @@ export default function DraftSyncProvider({ children }: { children: ReactNode })
     }
 
     setStatus("saving");
-    try {
-      const response = await fetch(`/api/drafts/${kind}`, {
-        method: "PUT",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ draft }),
-      });
-      if (response.status === 401) return false;
-      if (!response.ok) throw new Error("Save failed");
-
+    const result = await syncDraft(kind, draft);
+    if (result.ok) {
       if (userId) {
         sessionStorage.setItem(ownerKey(kind), userId);
         sessionStorage.setItem(sessionKey(kind), JSON.stringify(draft));
@@ -72,25 +86,44 @@ export default function DraftSyncProvider({ children }: { children: ReactNode })
       }
       setStatus("saved");
       return true;
-    } catch {
-      setStatus(navigator.onLine ? "failed" : "offline");
-      return false;
     }
+    if (result.status === 401) return false;
+    setStatus(navigator.onLine ? "failed" : "offline");
+    return false;
   }, []);
 
   const hydrate = useCallback(async (kind: Kind, userId: string) => {
-    if (localStorage.getItem(storageKey(kind)) || sessionStorage.getItem(sessionKey(kind))) return;
+    if (
+      localStorage.getItem(storageKey(kind)) ||
+      sessionStorage.getItem(sessionKey(kind))
+    )
+      return;
     try {
-      const response = await fetch(`/api/drafts/${kind}`);
+      const response = await fetch(`/api/drafts/${kind}`, {
+        credentials: "include",
+      });
       if (!response.ok) return;
-      const { draft } = (await response.json()) as { draft: unknown };
+
+      // Safe JSON parse: first read text, handle empty body, then parse
+      const text = await response.text().catch(() => "");
+      if (!text) return;
+      let parsed: unknown;
+      try {
+        parsed = JSON.parse(text);
+      } catch {
+        // Not JSON — ignore
+        return;
+      }
+      const { draft } = parsed as { draft: unknown };
       if (!draft) return;
 
       sessionStorage.setItem(sessionKey(kind), JSON.stringify(draft));
       sessionStorage.setItem(ownerKey(kind), userId);
       if (
         !sessionStorage.getItem(hydratedKey(kind)) &&
-        window.location.pathname.includes(kind === "project" ? "post-project" : "for-manufacturers/apply")
+        window.location.pathname.includes(
+          kind === "project" ? "post-project" : "for-manufacturers/apply",
+        )
       ) {
         sessionStorage.setItem(hydratedKey(kind), "1");
         window.location.reload();
@@ -124,9 +157,10 @@ export default function DraftSyncProvider({ children }: { children: ReactNode })
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "SIGNED_OUT") {
-        [PROJECT_DRAFT_SESSION_KEY, MANUFACTURER_APPLICATION_DRAFT_SESSION_KEY].forEach((key) =>
-          sessionStorage.removeItem(key),
-        );
+        [
+          PROJECT_DRAFT_SESSION_KEY,
+          MANUFACTURER_APPLICATION_DRAFT_SESSION_KEY,
+        ].forEach((key) => sessionStorage.removeItem(key));
         return;
       }
       if (session?.user) setTimeout(() => void connect(), 0);
@@ -161,7 +195,9 @@ export default function DraftSyncProvider({ children }: { children: ReactNode })
       window.removeEventListener("batchngo:draft-changed", changed);
       window.removeEventListener("online", online);
       window.removeEventListener("offline", offline);
-      Object.values(activeTimers).forEach((timer) => window.clearTimeout(timer));
+      Object.values(activeTimers).forEach((timer) =>
+        window.clearTimeout(timer),
+      );
     };
   }, [hydrate, sync]);
 

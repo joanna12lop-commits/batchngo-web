@@ -1,3 +1,126 @@
-import Link from"next/link";import{connection}from"next/server";import{notFound,redirect}from"next/navigation";import{createClient}from"../../../../lib/supabase/server";import type{Json}from"../../../../lib/supabase/database.types";
-const object=(value:Json):Record<string,Json|undefined>=>typeof value==="object"&&value!==null&&!Array.isArray(value)?value:{};const usd=(cents:number|null)=>cents===null?"—":new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(cents/100);
-export default async function CustomerProjectDetail({params}:{params:Promise<{id:string}>}){await connection();const{id}=await params,supabase=await createClient();const{data:{user}}=await supabase.auth.getUser();if(!user)redirect(`/login?next=/dashboard/projects/${id}`);const{data:profile}=await supabase.from("profiles").select("role").eq("id",user.id).maybeSingle();if(profile?.role!=="customer")redirect("/dashboard");const{data:project}=await supabase.from("projects").select("*").eq("id",id).eq("customer_id",user.id).maybeSingle();if(!project)notFound();const{data:quoteResult}=await supabase.from("quotes").select("*").eq("project_id",id).eq("status","submitted").order("submitted_at",{ascending:true});const quotes=quoteResult??[],makerIds=quotes.map(quote=>quote.manufacturer_profile_id);const{data:makerResult}=makerIds.length?await supabase.from("manufacturer_profiles").select("id,business_name,slug,supplier_types").in("id",makerIds):{data:[]};const makers=makerResult??[];return <main className="mx-auto max-w-[1400px] px-5 py-12 sm:px-8"><Link href="/dashboard/projects" className="text-sm font-bold text-[#667255]">← Your projects</Link><header className="mt-5"><span className="rounded-full bg-[#EEF1E8] px-3 py-1 text-xs font-bold text-[#667255]">{project.status.replaceAll("_"," ")}</span><h1 className="mt-4 text-4xl font-semibold">{project.title}</h1><p className="mt-3 max-w-3xl text-[#7C7A74]">{project.description}</p></header><section className="mt-8"><div className="flex items-end justify-between"><div><h2 className="text-2xl font-semibold">Manufacturer quotes</h2><p className="mt-2 text-sm text-[#7C7A74]">Compare non-binding estimates. Final scope and pricing still require direct confirmation.</p></div><span className="text-sm font-bold">{quotes.length} received</span></div>{quotes.length?<div className="mt-5 overflow-x-auto rounded-[24px] border border-[#E5E0D8] bg-white"><table className="w-full min-w-[1100px] text-left text-sm"><thead className="bg-[#EEEAE3] text-xs uppercase tracking-wider text-[#7C7A74]"><tr><th className="p-4">Manufacturer</th><th className="p-4">Unit price</th><th className="p-4">MOQ</th><th className="p-4">Setup</th><th className="p-4">Sample</th><th className="p-4">Lead time</th><th className="p-4">Location</th><th className="p-4">Expires</th></tr></thead><tbody>{quotes.map(quote=>{const maker=makers.find(item=>item.id===quote.manufacturer_profile_id),location=object(quote.production_location);const price=quote.estimated_unit_price_cents!==null?usd(quote.estimated_unit_price_cents):`${usd(quote.minimum_unit_price_cents)} – ${usd(quote.maximum_unit_price_cents)}`;return <tr key={quote.id} className="border-t border-[#E5E0D8] align-top"><td className="p-4"><strong>{maker?.business_name||"Approved manufacturer"}</strong><p className="mt-2 max-w-xs text-xs leading-5 text-[#7C7A74]">{quote.message}</p></td><td className="p-4 font-bold">{price} USD</td><td className="p-4">{quote.moq.toLocaleString("en-US")}</td><td className="p-4">{usd(quote.tooling_setup_cost_cents)}</td><td className="p-4">{quote.sample_available?`Available${quote.sample_cost_cents!==null?` · ${usd(quote.sample_cost_cents)}`:""}`:"Not available"}</td><td className="p-4">{quote.lead_time_days?`${quote.lead_time_days} days`:"—"}</td><td className="p-4">{[location.city,location.state].filter(Boolean).join(", ")}</td><td className="p-4">{quote.expires_at}</td></tr>})}</tbody></table></div>:<p className="mt-5 rounded-[24px] border border-dashed border-[#D3CDC2] p-10 text-center text-[#7C7A74]">No quotes yet. You will be notified when a matched manufacturer responds.</p>}</section></main>}
+import Link from "next/link";
+import { connection } from "next/server";
+import { notFound, redirect } from "next/navigation";
+import { createClient } from "../../../../lib/supabase/server";
+import ResumeDraftButton from "../../../../components/ResumeDraftButton";
+
+const usd = (cents: number | null) =>
+  cents === null
+    ? "—"
+    : new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+      }).format(cents / 100);
+
+export default async function CustomerProjectDetail({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  await connection();
+  const { id } = await params;
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect(`/login?next=/dashboard/projects/${id}`);
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .maybeSingle();
+  if (profile?.role !== "customer") redirect("/dashboard");
+
+  const { data: project } = await supabase
+    .from("projects")
+    .select("*")
+    .eq("id", id)
+    .eq("customer_id", user.id)
+    .maybeSingle();
+  if (!project) notFound();
+
+  const { data: quoteResult } = await supabase
+    .from("quotes")
+    .select("*")
+    .eq("project_id", id)
+    .eq("status", "submitted")
+    .order("submitted_at", { ascending: true });
+  const quotes = quoteResult ?? [];
+  const makerIds = quotes.map((quote) => quote.manufacturer_profile_id);
+  const { data: makerResult } = makerIds.length
+    ? await supabase
+        .from("manufacturer_profiles")
+        .select("id,business_name,slug,supplier_types")
+        .in("id", makerIds)
+    : { data: [] };
+  const makers = makerResult ?? [];
+
+  return (
+    <main className="mx-auto max-w-[1400px] px-5 py-12 sm:px-8">
+      <Link
+        href="/dashboard/projects"
+        className="text-sm font-bold text-[#667255]"
+      >
+        ← Your projects
+      </Link>
+      <header className="mt-5">
+        <div className="flex items-center justify-between">
+          <div>
+            <span className="rounded-full bg-[#EEF1E8] px-3 py-1 text-xs font-bold text-[#667255]">
+              {project.status.replaceAll("_", " ")}
+            </span>
+            <h1 className="mt-4 text-4xl font-semibold">{project.title}</h1>
+            <p className="mt-3 max-w-3xl text-[#7C7A74]">
+              {project.description}
+            </p>
+          </div>
+          {project.status === "draft" ? (
+            <div className="ml-6">
+              <ResumeDraftButton projectId={project.id} />
+            </div>
+          ) : null}
+        </div>
+      </header>
+      <section className="mt-8">
+        <div className="flex items-end justify-between">
+          <div>
+            <h2 className="text-2xl font-semibold">Manufacturer quotes</h2>
+            <p className="mt-2 text-sm text-[#7C7A74]">
+              Compare non-binding estimates. Final scope and pricing still
+              require direct confirmation.
+            </p>
+          </div>
+          <span className="text-sm font-bold">{quotes.length} received</span>
+        </div>
+        {quotes.length ? (
+          <div className="mt-5 overflow-x-auto rounded-[24px] border border-[#E5E0D8] bg-white">
+            <table className="w-full min-w-[1100px] text-left text-sm">
+              <thead className="bg-[#EEEAE3]">
+                <tr>
+                  <th className="p-4 text-left">Manufacturer</th>
+                  <th className="p-4 text-left">Estimate</th>
+                  <th className="p-4 text-left">Submitted</th>
+                </tr>
+              </thead>
+              <tbody>
+                {quotes.map((q) => (
+                  <tr key={q.id}>
+                    <td className="p-4">
+                      {makers.find(
+                        (m) => m.id === q.manufacturer_profile_id,
+                      )?.business_name ?? "—"}
+                    </td>
+                    <td className="p-4">{usd(q.estimated_unit_price_cents)}</td>
+                    <td className="p-4">{q.submitted_at ?? "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <p className="mt-6 text-sm text-[#7C7A74]">No quotes yet.</p>
+        )}
+      </section>
+    </main>
+  );
+}

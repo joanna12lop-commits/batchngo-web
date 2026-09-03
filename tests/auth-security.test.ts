@@ -59,3 +59,16 @@ test("RLS migrations protect user data and harden ownership columns", () => {
   assert.match(hardening, /mp\.owner_id = \(select auth\.uid\(\)\)/i);
   assert.match(initial, /revoke all on public\.admin_events from anon,authenticated/i);
 });
+
+test("project owners can submit without receiving ownership-column update privileges", () => {
+  const submission = source("app/api/submit/project/route.ts");
+  const migration = source("supabase/migrations/202609030003_allow_owner_project_submission.sql");
+
+  assert.match(submission, /update\(mutableFields\)/);
+  assert.doesNotMatch(migration, /grant update\s*\([^)]*customer_id/i);
+  assert.doesNotMatch(migration, /grant update\s*\([^)]*client_draft_id/i);
+  assert.match(migration, /grant update\s*\([^)]*status/i);
+  assert.match(migration, /using\s*\(\s*customer_id\s*=\s*\(select auth\.uid\(\)\)/i);
+  assert.match(migration, /with check\s*\(\s*customer_id\s*=\s*\(select auth\.uid\(\)\)/i);
+  assert.doesNotMatch(migration, /(?:from|join)\s+public\.project_matches/i);
+});
