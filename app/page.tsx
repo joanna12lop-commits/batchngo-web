@@ -9,6 +9,8 @@ import ProtectionSection from "../components/ProtectionSection";
 import ManufacturerCTA from "../components/ManufacturerCTA";
 import FinalCTA from "../components/FinalCTA";
 import Footer from "../components/Footer";
+import { publicMetadata } from "../lib/seo";
+export const metadata=publicMetadata("Small-Batch Manufacturing for Emerging Brands","Prepare a clear production project and explore small-batch manufacturing partners for your next product idea.","/");
 
 export default function Home() {
   return (

@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import type { ReactNode } from "react";
 import { getAdminContext } from "../../lib/admin/server";
+import type { Metadata } from "next";
+export const metadata:Metadata={title:"Admin",robots:{index:false,follow:false}};
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {
   await connection();

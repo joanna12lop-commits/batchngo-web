@@ -1,0 +1,3 @@
+import type{MetadataRoute}from"next";import{publishedBlogPosts}from"../lib/blog-data.ts";import{canonical}from"../lib/seo.ts";
+const routes=["/","/about","/find-makers","/how-it-works","/categories","/for-manufacturers"] as const;
+export default function sitemap():MetadataRoute.Sitemap{return[...routes.map((path,index)=>({url:canonical(path),changeFrequency:(index===0?"weekly":"monthly") as "weekly"|"monthly",priority:index===0?1:0.7})),...publishedBlogPosts.map(post=>({url:canonical(`/blog/${post.slug}`),lastModified:post.updatedAt??post.publishedAt,changeFrequency:"monthly" as const,priority:0.6}))]}

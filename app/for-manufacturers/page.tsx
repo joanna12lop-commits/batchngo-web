@@ -1,0 +1,3 @@
+import StaticInfoPage from"../../components/StaticInfoPage";import{publicMetadata}from"../../lib/seo";
+export const metadata=publicMetadata("For Small-Batch Manufacturers","Learn how manufacturers can prepare a supplier profile for the developing BatchNGo marketplace.","/for-manufacturers");
+export default function Page(){return <StaticInfoPage eyebrow="For manufacturers" title="Prepare your supplier profile" description="Describe your capabilities, typical order sizes and production coverage in a reusable browser draft while the BatchNGo marketplace is in development." actionHref="/for-manufacturers/apply" actionLabel="Prepare an application draft"/>}

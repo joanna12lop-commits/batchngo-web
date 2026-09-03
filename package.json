@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --experimental-strip-types --test tests/admin-authorization.test.ts tests/marketplace-taxonomy.test.ts"
+    "test": "node --experimental-strip-types --test tests/admin-authorization.test.ts tests/marketplace-taxonomy.test.ts tests/seo.test.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",

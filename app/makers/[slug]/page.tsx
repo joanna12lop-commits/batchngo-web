@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Check } from "lucide-react";
+import type { Metadata } from "next";
 import Footer from "../../../components/Footer";
 import Header from "../../../components/Header";
 import SaveMakerButton from "../../../components/SaveMakerButton";
@@ -16,6 +17,7 @@ export function generateStaticParams() {
 }
 
 export const dynamicParams = false;
+export async function generateMetadata({params}:PageProps<"/makers/[slug]">):Promise<Metadata>{const{slug}=await params;const maker=getManufacturerBySlug(slug);if(!maker)return{title:"Maker profile",robots:{index:false,follow:false}};return{title:`${maker.businessName} — Sample Maker Profile`,description:maker.shortDescription,alternates:{canonical:`/makers/${maker.slug}`},robots:{index:false,follow:false},openGraph:{title:maker.businessName,description:maker.shortDescription,url:`/makers/${maker.slug}`,type:"profile"}}}
 
 function ProfileBadge() {
   return (
