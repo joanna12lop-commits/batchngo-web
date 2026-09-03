@@ -4,9 +4,11 @@ import { connection } from "next/server";
 import { createAdminClient } from "../supabase/admin";
 import { createClient } from "../supabase/server";
 import { authorizeAdminRole } from "./authorization";
+import { isSupabaseConfigured } from "../supabase/config";
 
 export async function getAdminContext() {
   await connection();
+  if (!isSupabaseConfigured()) return { ok: false as const, status: 401 as const, error: "Unauthorized" as const };
   const client = await createClient();
   const { data: { user } } = await client.auth.getUser();
   if (!user) return { ok: false as const, status: 401 as const, error: "Unauthorized" as const };

@@ -1,2 +1,26 @@
-import Header from "../../components/Header";import Footer from"../../components/Footer";import{isSupabaseConfigured}from"../../lib/supabase/config";import{sendMagicLink,signInWithPassword,signUp}from"./actions";
-export default async function LoginPage({searchParams}:{searchParams:Promise<{message?:string;next?:string}>}){const{message,next:requestedNext}=await searchParams;const next=requestedNext?.startsWith("/")&&!requestedNext.startsWith("//")?requestedNext:"/account";const configured=isSupabaseConfigured();const input="mt-2 h-12 w-full rounded-2xl border border-[#E5E0D8] bg-[#F6F3EE]/70 px-4 outline-none focus:border-[#7C8A6A] focus:ring-4 focus:ring-[#7C8A6A]/10";const continuation=<input type="hidden" name="next" value={next}/>;return <div className="min-h-screen bg-[#F6F3EE]"><Header/><main className="mx-auto max-w-5xl px-4 py-20 sm:px-8"><header className="mb-10"><p className="text-sm font-semibold uppercase tracking-[0.24em] text-[#7C8A6A]">BatchNGo Account</p><h1 className="mt-4 text-4xl font-semibold text-[#111111]">Sign in or create an account</h1><p className="mt-4 text-[#7C7A74]">Use email and password or request a secure magic link.</p></header>{!configured?<p role="status" className="mb-8 rounded-2xl border border-[#C9826B] bg-[#F5E6E0]/30 p-4 text-sm">Supabase is not configured. Add the variables from .env.example to enable authentication.</p>:null}{message?<p role="status" className="mb-8 rounded-2xl border border-[#7C8A6A] bg-[#EEF1E8] p-4 text-sm">{message}</p>:null}<div className="grid gap-6 lg:grid-cols-2"><section className="rounded-[32px] border border-[#E5E0D8] bg-white p-8 shadow-sm"><h2 className="text-2xl font-semibold">Sign in</h2><form action={signInWithPassword} className="mt-6 space-y-4">{continuation}<label className="block text-sm font-semibold">Email<input name="email" type="email" required autoComplete="email" className={input}/></label><label className="block text-sm font-semibold">Password<input name="password" type="password" required autoComplete="current-password" className={input}/></label><button disabled={!configured} className="w-full rounded-full bg-[#7C8A6A] px-6 py-3 font-semibold text-white disabled:opacity-40">Sign in</button></form><form action={sendMagicLink} className="mt-6 border-t border-[#E5E0D8] pt-6">{continuation}<label className="block text-sm font-semibold">Email for magic link<input name="email" type="email" required className={input}/></label><button disabled={!configured} className="mt-4 w-full rounded-full border border-[#7C8A6A] px-6 py-3 font-semibold disabled:opacity-40">Email me a sign-in link</button></form></section><section className="rounded-[32px] border border-[#E5E0D8] bg-white p-8 shadow-sm"><h2 className="text-2xl font-semibold">Create an account</h2><form action={signUp} className="mt-6 space-y-4">{continuation}<label className="block text-sm font-semibold">Account type<select name="accountType" className={input}><option value="customer">Customer</option><option value="manufacturer">Manufacturer</option></select></label><label className="block text-sm font-semibold">Email<input name="email" type="email" required autoComplete="email" className={input}/></label><label className="block text-sm font-semibold">Password<input name="password" type="password" minLength={8} required autoComplete="new-password" className={input}/></label><button disabled={!configured} className="w-full rounded-full bg-[#7C8A6A] px-6 py-3 font-semibold text-white disabled:opacity-40">Create account</button></form></section></div></main><Footer/></div>}
+import Header from "../../components/Header";
+import Footer from "../../components/Footer";
+import { safeRedirectPath } from "../../lib/auth/redirects";
+import { isSupabaseConfigured } from "../../lib/supabase/config";
+import LoginForms from "./LoginForms";
+
+export default async function LoginPage({ searchParams }: { searchParams: Promise<{ message?: string; next?: string }> }) {
+  const { message, next: requestedNext } = await searchParams;
+  const next = safeRedirectPath(requestedNext);
+  const configured = isSupabaseConfigured();
+  const callbackFailed = message === "confirmation-failed";
+  return <div className="min-h-screen bg-[#F6F3EE]">
+    <Header />
+    <main className="mx-auto max-w-5xl px-4 py-16 sm:px-8 sm:py-20">
+      <header className="mx-auto mb-10 max-w-xl">
+        <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[#7C8A6A]">BatchNGo Account</p>
+        <h1 className="mt-4 text-4xl font-semibold text-[#111111]">Sign in or create an account</h1>
+        <p className="mt-4 text-[#7C7A74]">Access your private dashboard with email and password or a secure magic link.</p>
+      </header>
+      {!configured ? <p role="status" className="mx-auto mb-8 max-w-xl rounded-2xl border border-[#C9826B] bg-[#F5E6E0]/30 p-4 text-sm">{process.env.NODE_ENV === "development" ? "Authentication is not configured. Add the Supabase variables listed in .env.example." : "Authentication is temporarily unavailable. Please try again later."}</p> : null}
+      {callbackFailed ? <p role="alert" className="mx-auto mb-8 max-w-xl rounded-2xl border border-[#C9826B] bg-[#F5E6E0]/30 p-4 text-sm">We could not confirm that sign-in link. Request a new link and try again.</p> : null}
+      <LoginForms configured={configured} next={next} />
+    </main>
+    <Footer />
+  </div>;
+}
